@@ -10,7 +10,7 @@ Pull requests are a way to propose changes to a database. A pull request is crea
 
 ## How to use pull requests
 
-You can use pull requests to propose changes for another branch. To create a pull request, you should make changes to a branch on your database or a [fork](./forks.md) of another database. Then you can use the new pull request form to choose your base branch. You can also add a title (required) and description (optional).
+You can use pull requests to propose changes for another branch. To create a pull request, you should make changes to a branch on your database or a [fork](forks.md) of another database. Then you can use the new pull request form to choose your base branch. You can also add a title (required) and description (optional).
 
 ## Difference between GitHub pull requests and DoltHub pull requests
 
@@ -20,9 +20,9 @@ Due to the difference in nature of reviewing data vs reviewing code, diffs on Do
 
 ## Example
 
-We will use our [`dolthub/us-schools`](https://www.dolthub.com/repositories/dolthub/us-schools) database as an example. This database was created through one of our [bounties](../../introduction/getting-started/data-bounties.md).
+We will use our [`dolthub/us-schools`](https://www.dolthub.com/repositories/dolthub/us-schools) database as an example. This database was created through one of our [bounties](https://github.com/dolthub/docs/blob/gitbook-dev/content/introduction/getting-started/data-bounties.md).
 
-First, we [fork](./forks.md) the database and clone our fork.
+First, we [fork](forks.md) the database and clone our fork.
 
 ```
 % dolt clone taylor/us-schools

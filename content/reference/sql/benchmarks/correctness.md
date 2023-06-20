@@ -2,19 +2,9 @@
 title: Correctness
 ---
 
-# SQL Correctness
+# Correctness
 
-To measure Dolt's SQL correctness, we test each release of Dolt
-against a SQL testing suite called
-[sqllogictest](https://github.com/dolthub/sqllogictest). This suite
-consists of 5.9 million SQL queries and their results, using the
-results returned by MySQL as a reference. Many of these are randomly
-generated queries that exercise very complex logic a human would have
-a hard time reasoning about. They give us greater confidence that the
-query engine produces correct results for any query, as opposed to
-just the ones we and our customers have thought to try so far. These
-tests have exposed many bugs in query execution logic before customers
-discovered them.
+To measure Dolt's SQL correctness, we test each release of Dolt against a SQL testing suite called [sqllogictest](https://github.com/dolthub/sqllogictest). This suite consists of 5.9 million SQL queries and their results, using the results returned by MySQL as a reference. Many of these are randomly generated queries that exercise very complex logic a human would have a hard time reasoning about. They give us greater confidence that the query engine produces correct results for any query, as opposed to just the ones we and our customers have thought to try so far. These tests have exposed many bugs in query execution logic before customers discovered them.
 
 Here's an example of a query run by this test suite:
 
@@ -53,20 +43,16 @@ AND col3 IN (3,9,0))))) OR col4 <= 4.25 OR ((col3 = 5))) OR (((col0 >
 0)) AND col0 > 6 AND (col4 >= 6.56)))
 ```
 
-Here are Dolt's sqllogictest results for version `1.4.0`.  Tests that
-did not run could not complete due to a timeout earlier in the run.
-<!-- START___DOLT___CORRECTNESS_RESULTS_TABLE -->
-|   Results   |  Count  |
-|-------------|---------|
-| did not run |     623 |
-| not ok      |    6899 |
-| ok          | 5929940 |
-| timeout     |       1 |
+Here are Dolt's sqllogictest results for version `1.4.2`. Tests that did not run could not complete due to a timeout earlier in the run.
 
-| Total Tests | 5937463 |
-|-------------|---------|
+| Results     | Count   |
+| ----------- | ------- |
+| did not run | 515     |
+| not ok      | 6933    |
+| ok          | 5930014 |
+| timeout     | 1       |
 
 | Correctness Percentage | 99.87 |
-|------------------------|-------|
-<!-- END___DOLT___CORRECTNESS_RESULTS_TABLE -->
-<br/>
+| ---------------------- | ----- |
+|                        |       |
+| <p><br></p>            |       |

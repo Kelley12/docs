@@ -6,53 +6,49 @@ title: Miscellaneous
 
 ## Misc features
 
-| Component                         | Supported | Notes and limitations                                                                                                 |
-|:----------------------------------|:----------|:----------------------------------------------------------------------------------------------------------------------|
-| Information schema                | ✅         |                                                                                                                       |
-| Views                             | ✅         |                                                                                                                       |
-| Window functions                  | 🟠         | Some functions not supported, see [window function docs](./expressions-functions-operators.md#window-functions)       |
-| Common table expressions \(CTEs\) | ✅         |                                                                                                                       |
-| Stored procedures                 | 🟠         | Only a few statements are not yet supported, see [compound statements](./supported-statements.md#compound-statements) |
-| Cursors                           | ✅         |                                                                                                                       |
-| Triggers                          | ✅         |                                                                                                                       |
+| Component                       | Supported | Notes and limitations                                                                                               |
+| ------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------- |
+| Information schema              | ✅         |                                                                                                                     |
+| Views                           | ✅         |                                                                                                                     |
+| Window functions                | 🟠        | Some functions not supported, see [window function docs](expressions-functions-operators.md#window-functions)       |
+| Common table expressions (CTEs) | ✅         |                                                                                                                     |
+| Stored procedures               | 🟠        | Only a few statements are not yet supported, see [compound statements](supported-statements.md#compound-statements) |
+| Cursors                         | ✅         |                                                                                                                     |
+| Triggers                        | ✅         |                                                                                                                     |
 
 ## Client Compatibility
 
 Some MySQL features are client features, not server features. Dolt ships with a client (ie. [`dolt sql`](../../cli.md#dolt-sql) or [`dolt sql-client`](../../cli.md#dolt-sql-client)) and a server ([`dolt sql-server`](../../cli.md#dolt-sql-server)). The Dolt client is not as sophisticated as the `mysql` client. To access these features you can use the `mysql` client that ships with MySQL.
 
-| Feature                         | Supported | Notes and limitations                                                                                    |
-|:--------------------------------|:----------|:---------------------------------------------------------------------------------------------------------|
-| SOURCE                          | ❌        | Works with Dolt via the `mysql` client                                                                    |
-| LOAD DATA LOCAL INFILE          | ❌        | LOAD DATA INFILE works with the Dolt client. The LOCAL option only works with Dolt via the `mysql` client |
+| Feature                | Supported | Notes and limitations                                                                                     |
+| ---------------------- | --------- | --------------------------------------------------------------------------------------------------------- |
+| SOURCE                 | ❌         | Works with Dolt via the `mysql` client                                                                    |
+| LOAD DATA LOCAL INFILE | ❌         | LOAD DATA INFILE works with the Dolt client. The LOCAL option only works with Dolt via the `mysql` client |
 
 ## Join hints
 
 Dolt supports the following join hints:
 
-| name                     | supported | detail                                                                                          |
-|--------------------------|-----------|-------------------------------------------------------------------------------------------------|
-| JOIN_ORDER(<table1>,...) | ✅         | Join tree in scope should use the following join execution order. Must include all table names. |
-| LOOKUP_JOIN(<t1>,<t2>)   | ✅         | Use LOOKUP strategy joining two tables.                                                         |
-| MERGE_JOIN(<t1>,<t2>)    | ✅         | Use MERGE strategy joining two tables.                                                          |
-| HASH_JOIN(<t1>,<t2>)     | ✅         | Use HASH strategy joining two tables.                                                           |
-| INNER_JOIN(<t1>,<t2>)    | ✅         | Use INNER strategy joining two tables.                                                          |
-| SEMI_JOIN(<t1>,<t2>)     | ❌         | Use SEMI strategy joining two tables.                                                           |
-| ANTI_JOIN(<t1>,<t2>)     | ❌         | Use ANTI strategy joining two tables.                                                           |
-| JOIN_FIXED_ORDER         | ❌         | Join tree uses in-place table order for execution.                                              |
-| NO_ICP                   | ❌         | Disable indexed range scans on index using filters.                                             |
+| name               | supported | detail                                                                                          |
+| ------------------ | --------- | ----------------------------------------------------------------------------------------------- |
+| JOIN\_ORDER(,...)  | ✅         | Join tree in scope should use the following join execution order. Must include all table names. |
+| LOOKUP\_JOIN(,)    | ✅         | Use LOOKUP strategy joining two tables.                                                         |
+| MERGE\_JOIN(,)     | ✅         | Use MERGE strategy joining two tables.                                                          |
+| HASH\_JOIN(,)      | ✅         | Use HASH strategy joining two tables.                                                           |
+| INNER\_JOIN(,)     | ✅         | Use INNER strategy joining two tables.                                                          |
+| SEMI\_JOIN(,)      | ❌         | Use SEMI strategy joining two tables.                                                           |
+| ANTI\_JOIN(,)      | ❌         | Use ANTI strategy joining two tables.                                                           |
+| JOIN\_FIXED\_ORDER | ❌         | Join tree uses in-place table order for execution.                                              |
+| NO\_ICP            | ❌         | Disable indexed range scans on index using filters.                                             |
 
-Join hints are indicated immediately after a `SELECT` token in a special
-comment format `/*+ */`. Multiple hints should be separated by spaces:
+Join hints are indicated immediately after a `SELECT` token in a special comment format `/*+ */`. Multiple hints should be separated by spaces:
 
 ```sql
 SELECT /*+ JOIN_ORDER(arg1,arg2) */ 1
 SELECT /*+ JOIN_ORDER(arg1,arg2) NO_ICP */ 1
 ```
 
-Join hints currently require a full set of valid hints for all to be
-applied. For example, if we have a three table join we can enforce
-JOIN_ORDER on its own, join strategies on their own, or both order
-and strategy:
+Join hints currently require a full set of valid hints for all to be applied. For example, if we have a three table join we can enforce JOIN\_ORDER on its own, join strategies on their own, or both order and strategy:
 
 ```sql
 SELECT /*+ JOIN_ORDER(xy,uv,ab) LOOKUP_JOIN(xy,uv) HASH_JOIN(uv,ab) */ 1
@@ -62,288 +58,300 @@ JOIN ab on a = u;
 ```
 
 Additional notes:
-- If one hint is invalid given the execution options, no hints are applied and the engine falls back to default costing.
-- Join operator hints are order-insensitive
-- Join operator hints apply as long as the indicated tables are subsets of the join left/right.
+
+* If one hint is invalid given the execution options, no hints are applied and the engine falls back to default costing.
+* Join operator hints are order-insensitive
+* Join operator hints apply as long as the indicated tables are subsets of the join left/right.
 
 ## Collations and character sets
 
-Dolt supports a subset of the character sets and collations that MySQL supports.
-Notably, the default character set is `utf8mb4`, while the default collation is `utf8mb4_0900_bin` (a case-sensitive collation).
-This default was chosen as it has the fastest implementation, and also from a legacy perspective, as before proper collation support was added, it was the only real collation that we supported.
-This differs from a standard MySQL instance, which defaults to `utf8mb4_0900_ai_ci` (a case-insensitive collation).
-Character sets and collations are added upon request, so please [file an issue](https://github.com/dolthub/dolt/issues) if a character set or collation that you need is missing.
+Dolt supports a subset of the character sets and collations that MySQL supports. Notably, the default character set is `utf8mb4`, while the default collation is `utf8mb4_0900_bin` (a case-sensitive collation). This default was chosen as it has the fastest implementation, and also from a legacy perspective, as before proper collation support was added, it was the only real collation that we supported. This differs from a standard MySQL instance, which defaults to `utf8mb4_0900_ai_ci` (a case-insensitive collation). Character sets and collations are added upon request, so please [file an issue](https://github.com/dolthub/dolt/issues) if a character set or collation that you need is missing.
 
-| Collation                   | Character Set | Supported |
-|:----------------------------|:--------------|:----------|
-| armscii8_bin                | armscii8      | ❌         |
-| armscii8_general_ci         | armscii8      | ❌         |
-| ascii_bin                   | ascii         | ✅         |
-| ascii_general_ci            | ascii         | ✅         |
-| big5_bin                    | big5          | ❌         |
-| big5_chinese_ci             | big5          | ❌         |
-| cp1250_bin                  | cp1250        | ❌         |
-| cp1250_croatian_ci          | cp1250        | ❌         |
-| cp1250_czech_cs             | cp1250        | ❌         |
-| cp1250_general_ci           | cp1250        | ❌         |
-| cp1250_polish_ci            | cp1250        | ❌         |
-| cp1251_bin                  | cp1251        | ❌         |
-| cp1251_bulgarian_ci         | cp1251        | ❌         |
-| cp1251_general_ci           | cp1251        | ❌         |
-| cp1251_general_cs           | cp1251        | ❌         |
-| cp1251_ukrainian_ci         | cp1251        | ❌         |
-| cp1256_bin                  | cp1256        | ❌         |
-| cp1256_general_ci           | cp1256        | ❌         |
-| cp1257_bin                  | cp1257        | ❌         |
-| cp1257_general_ci           | cp1257        | ❌         |
-| cp1257_lithuanian_ci        | cp1257        | ❌         |
-| cp850_bin                   | cp850         | ❌         |
-| cp850_general_ci            | cp850         | ❌         |
-| cp852_bin                   | cp852         | ❌         |
-| cp852_general_ci            | cp852         | ❌         |
-| cp866_bin                   | cp866         | ❌         |
-| cp866_general_ci            | cp866         | ❌         |
-| cp932_bin                   | cp932         | ❌         |
-| cp932_japanese_ci           | cp932         | ❌         |
-| dec8_bin                    | dec8          | ❌         |
-| dec8_swedish_ci             | dec8          | ❌         |
-| eucjpms_bin                 | eucjpms       | ❌         |
-| eucjpms_japanese_ci         | eucjpms       | ❌         |
-| euckr_bin                   | euckr         | ❌         |
-| euckr_korean_ci             | euckr         | ❌         |
-| gb18030_bin                 | gb18030       | ❌         |
-| gb18030_chinese_ci          | gb18030       | ❌         |
-| gb18030_unicode_520_ci      | gb18030       | ❌         |
-| gb2312_bin                  | gb2312        | ❌         |
-| gb2312_chinese_ci           | gb2312        | ❌         |
-| gbk_bin                     | gbk           | ❌         |
-| gbk_chinese_ci              | gbk           | ❌         |
-| geostd8_bin                 | geostd8       | ❌         |
-| geostd8_general_ci          | geostd8       | ❌         |
-| greek_bin                   | greek         | ❌         |
-| greek_general_ci            | greek         | ❌         |
-| hebrew_bin                  | hebrew        | ❌         |
-| hebrew_general_ci           | hebrew        | ❌         |
-| hp8_bin                     | hp8           | ❌         |
-| hp8_english_ci              | hp8           | ❌         |
-| keybcs2_bin                 | keybcs2       | ❌         |
-| keybcs2_general_ci          | keybcs2       | ❌         |
-| koi8r_bin                   | koi8r         | ❌         |
-| koi8r_general_ci            | koi8r         | ❌         |
-| koi8u_bin                   | koi8u         | ❌         |
-| koi8u_general_ci            | koi8u         | ❌         |
-| latin1_bin                  | latin1        | ✅         |
-| latin1_danish_ci            | latin1        | ✅         |
-| latin1_general_ci           | latin1        | ✅         |
-| latin1_general_cs           | latin1        | ✅         |
-| latin1_german1_ci           | latin1        | ✅         |
-| latin1_german2_ci           | latin1        | ✅         |
-| latin1_spanish_ci           | latin1        | ✅         |
-| latin1_swedish_ci           | latin1        | ✅         |
-| latin2_bin                  | latin2        | ❌         |
-| latin2_croatian_ci          | latin2        | ❌         |
-| latin2_czech_cs             | latin2        | ❌         |
-| latin2_general_ci           | latin2        | ❌         |
-| latin2_hungarian_ci         | latin2        | ❌         |
-| latin5_bin                  | latin5        | ❌         |
-| latin5_turkish_ci           | latin5        | ❌         |
-| latin7_bin                  | latin7        | ❌         |
-| latin7_estonian_cs          | latin7        | ❌         |
-| latin7_general_ci           | latin7        | ❌         |
-| latin7_general_cs           | latin7        | ❌         |
-| macce_bin                   | macce         | ❌         |
-| macce_general_ci            | macce         | ❌         |
-| macroman_bin                | macroman      | ❌         |
-| macroman_general_ci         | macroman      | ❌         |
-| sjis_bin                    | sjis          | ❌         |
-| sjis_japanese_ci            | sjis          | ❌         |
-| swe7_bin                    | swe7          | ❌         |
-| swe7_swedish_ci             | swe7          | ❌         |
-| tis620_bin                  | tis620        | ❌         |
-| tis620_thai_ci              | tis620        | ❌         |
-| ucs2_bin                    | ucs2          | ❌         |
-| ucs2_croatian_ci            | ucs2          | ❌         |
-| ucs2_czech_ci               | ucs2          | ❌         |
-| ucs2_danish_ci              | ucs2          | ❌         |
-| ucs2_esperanto_ci           | ucs2          | ❌         |
-| ucs2_estonian_ci            | ucs2          | ❌         |
-| ucs2_general_ci             | ucs2          | ❌         |
-| ucs2_general_mysql500_ci    | ucs2          | ❌         |
-| ucs2_german2_ci             | ucs2          | ❌         |
-| ucs2_hungarian_ci           | ucs2          | ❌         |
-| ucs2_icelandic_ci           | ucs2          | ❌         |
-| ucs2_latvian_ci             | ucs2          | ❌         |
-| ucs2_lithuanian_ci          | ucs2          | ❌         |
-| ucs2_persian_ci             | ucs2          | ❌         |
-| ucs2_polish_ci              | ucs2          | ❌         |
-| ucs2_roman_ci               | ucs2          | ❌         |
-| ucs2_romanian_ci            | ucs2          | ❌         |
-| ucs2_sinhala_ci             | ucs2          | ❌         |
-| ucs2_slovak_ci              | ucs2          | ❌         |
-| ucs2_slovenian_ci           | ucs2          | ❌         |
-| ucs2_spanish2_ci            | ucs2          | ❌         |
-| ucs2_spanish_ci             | ucs2          | ❌         |
-| ucs2_swedish_ci             | ucs2          | ❌         |
-| ucs2_turkish_ci             | ucs2          | ❌         |
-| ucs2_unicode_520_ci         | ucs2          | ❌         |
-| ucs2_unicode_ci             | ucs2          | ❌         |
-| ucs2_vietnamese_ci          | ucs2          | ❌         |
-| ujis_bin                    | ujis          | ❌         |
-| ujis_japanese_ci            | ujis          | ❌         |
-| utf16_bin                   | utf16         | ✅         |
-| utf16_croatian_ci           | utf16         | ❌         |
-| utf16_czech_ci              | utf16         | ❌         |
-| utf16_danish_ci             | utf16         | ❌         |
-| utf16_esperanto_ci          | utf16         | ❌         |
-| utf16_estonian_ci           | utf16         | ❌         |
-| utf16_general_ci            | utf16         | ✅         |
-| utf16_german2_ci            | utf16         | ❌         |
-| utf16_hungarian_ci          | utf16         | ❌         |
-| utf16_icelandic_ci          | utf16         | ❌         |
-| utf16_latvian_ci            | utf16         | ❌         |
-| utf16_lithuanian_ci         | utf16         | ❌         |
-| utf16_persian_ci            | utf16         | ❌         |
-| utf16_polish_ci             | utf16         | ❌         |
-| utf16_roman_ci              | utf16         | ❌         |
-| utf16_romanian_ci           | utf16         | ❌         |
-| utf16_sinhala_ci            | utf16         | ❌         |
-| utf16_slovak_ci             | utf16         | ❌         |
-| utf16_slovenian_ci          | utf16         | ❌         |
-| utf16_spanish2_ci           | utf16         | ❌         |
-| utf16_spanish_ci            | utf16         | ❌         |
-| utf16_swedish_ci            | utf16         | ❌         |
-| utf16_turkish_ci            | utf16         | ❌         |
-| utf16_unicode_520_ci        | utf16         | ❌         |
-| utf16_unicode_ci            | utf16         | ✅         |
-| utf16_vietnamese_ci         | utf16         | ❌         |
-| utf16le_bin                 | utf16le       | ❌         |
-| utf16le_general_ci          | utf16le       | ❌         |
-| utf32_bin                   | utf32         | ✅         |
-| utf32_croatian_ci           | utf32         | ❌         |
-| utf32_czech_ci              | utf32         | ❌         |
-| utf32_danish_ci             | utf32         | ❌         |
-| utf32_esperanto_ci          | utf32         | ❌         |
-| utf32_estonian_ci           | utf32         | ❌         |
-| utf32_general_ci            | utf32         | ✅         |
-| utf32_german2_ci            | utf32         | ❌         |
-| utf32_hungarian_ci          | utf32         | ❌         |
-| utf32_icelandic_ci          | utf32         | ❌         |
-| utf32_latvian_ci            | utf32         | ❌         |
-| utf32_lithuanian_ci         | utf32         | ❌         |
-| utf32_persian_ci            | utf32         | ❌         |
-| utf32_polish_ci             | utf32         | ❌         |
-| utf32_roman_ci              | utf32         | ❌         |
-| utf32_romanian_ci           | utf32         | ❌         |
-| utf32_sinhala_ci            | utf32         | ❌         |
-| utf32_slovak_ci             | utf32         | ❌         |
-| utf32_slovenian_ci          | utf32         | ❌         |
-| utf32_spanish2_ci           | utf32         | ❌         |
-| utf32_spanish_ci            | utf32         | ❌         |
-| utf32_swedish_ci            | utf32         | ❌         |
-| utf32_turkish_ci            | utf32         | ❌         |
-| utf32_unicode_520_ci        | utf32         | ❌         |
-| utf32_unicode_ci            | utf32         | ❌         |
-| utf32_vietnamese_ci         | utf32         | ❌         |
-| utf8mb3_bin                 | utf8mb3       | ✅         |
-| utf8mb3_croatian_ci         | utf8mb3       | ❌         |
-| utf8mb3_czech_ci            | utf8mb3       | ❌         |
-| utf8mb3_danish_ci           | utf8mb3       | ❌         |
-| utf8mb3_esperanto_ci        | utf8mb3       | ❌         |
-| utf8mb3_estonian_ci         | utf8mb3       | ❌         |
-| utf8mb3_general_ci          | utf8mb3       | ✅         |
-| utf8mb3_general_mysql500_ci | utf8mb3       | ❌         |
-| utf8mb3_german2_ci          | utf8mb3       | ❌         |
-| utf8mb3_hungarian_ci        | utf8mb3       | ❌         |
-| utf8mb3_icelandic_ci        | utf8mb3       | ❌         |
-| utf8mb3_latvian_ci          | utf8mb3       | ❌         |
-| utf8mb3_lithuanian_ci       | utf8mb3       | ❌         |
-| utf8mb3_persian_ci          | utf8mb3       | ❌         |
-| utf8mb3_polish_ci           | utf8mb3       | ❌         |
-| utf8mb3_roman_ci            | utf8mb3       | ❌         |
-| utf8mb3_romanian_ci         | utf8mb3       | ❌         |
-| utf8mb3_sinhala_ci          | utf8mb3       | ❌         |
-| utf8mb3_slovak_ci           | utf8mb3       | ❌         |
-| utf8mb3_slovenian_ci        | utf8mb3       | ❌         |
-| utf8mb3_spanish2_ci         | utf8mb3       | ❌         |
-| utf8mb3_spanish_ci          | utf8mb3       | ❌         |
-| utf8mb3_swedish_ci          | utf8mb3       | ❌         |
-| utf8mb3_tolower_ci          | utf8mb3       | ❌         |
-| utf8mb3_turkish_ci          | utf8mb3       | ❌         |
-| utf8mb3_unicode_520_ci      | utf8mb3       | ❌         |
-| utf8mb3_unicode_ci          | utf8mb3       | ✅         |
-| utf8mb3_vietnamese_ci       | utf8mb3       | ❌         |
-| utf8mb4_0900_ai_ci          | utf8mb4       | ✅         |
-| utf8mb4_0900_as_ci          | utf8mb4       | ❌         |
-| utf8mb4_0900_as_cs          | utf8mb4       | ❌         |
-| utf8mb4_0900_bin            | utf8mb4       | ✅         |
-| utf8mb4_bin                 | utf8mb4       | ✅         |
-| utf8mb4_croatian_ci         | utf8mb4       | ❌         |
-| utf8mb4_cs_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_cs_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_czech_ci            | utf8mb4       | ❌         |
-| utf8mb4_da_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_da_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_danish_ci           | utf8mb4       | ❌         |
-| utf8mb4_de_pb_0900_ai_ci    | utf8mb4       | ❌         |
-| utf8mb4_de_pb_0900_as_cs    | utf8mb4       | ❌         |
-| utf8mb4_eo_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_eo_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_es_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_es_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_es_trad_0900_ai_ci  | utf8mb4       | ❌         |
-| utf8mb4_es_trad_0900_as_cs  | utf8mb4       | ❌         |
-| utf8mb4_esperanto_ci        | utf8mb4       | ❌         |
-| utf8mb4_estonian_ci         | utf8mb4       | ❌         |
-| utf8mb4_et_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_et_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_general_ci          | utf8mb4       | ✅         |
-| utf8mb4_german2_ci          | utf8mb4       | ❌         |
-| utf8mb4_hr_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_hr_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_hu_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_hu_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_hungarian_ci        | utf8mb4       | ❌         |
-| utf8mb4_icelandic_ci        | utf8mb4       | ❌         |
-| utf8mb4_is_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_is_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_ja_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_ja_0900_as_cs_ks    | utf8mb4       | ❌         |
-| utf8mb4_la_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_la_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_latvian_ci          | utf8mb4       | ❌         |
-| utf8mb4_lithuanian_ci       | utf8mb4       | ❌         |
-| utf8mb4_lt_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_lt_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_lv_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_lv_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_persian_ci          | utf8mb4       | ❌         |
-| utf8mb4_pl_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_pl_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_polish_ci           | utf8mb4       | ❌         |
-| utf8mb4_ro_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_ro_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_roman_ci            | utf8mb4       | ❌         |
-| utf8mb4_romanian_ci         | utf8mb4       | ❌         |
-| utf8mb4_ru_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_ru_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_sinhala_ci          | utf8mb4       | ❌         |
-| utf8mb4_sk_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_sk_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_sl_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_sl_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_slovak_ci           | utf8mb4       | ❌         |
-| utf8mb4_slovenian_ci        | utf8mb4       | ❌         |
-| utf8mb4_spanish2_ci         | utf8mb4       | ❌         |
-| utf8mb4_spanish_ci          | utf8mb4       | ❌         |
-| utf8mb4_sv_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_sv_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_swedish_ci          | utf8mb4       | ❌         |
-| utf8mb4_tr_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_tr_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_turkish_ci          | utf8mb4       | ❌         |
-| utf8mb4_unicode_520_ci      | utf8mb4       | ✅         |
-| utf8mb4_unicode_ci          | utf8mb4       | ✅         |
-| utf8mb4_vi_0900_ai_ci       | utf8mb4       | ❌         |
-| utf8mb4_vi_0900_as_cs       | utf8mb4       | ❌         |
-| utf8mb4_vietnamese_ci       | utf8mb4       | ❌         |
-| utf8mb4_zh_0900_as_cs       | utf8mb4       | ❌         |
+| Collation                       | Character Set | Supported |
+| ------------------------------- | ------------- | --------- |
+| armscii8\_bin                   | armscii8      | ❌         |
+| armscii8\_general\_ci           | armscii8      | ❌         |
+| ascii\_bin                      | ascii         | ✅         |
+| ascii\_general\_ci              | ascii         | ✅         |
+| big5\_bin                       | big5          | ❌         |
+| big5\_chinese\_ci               | big5          | ❌         |
+| binary                          | binary        | ✅         |
+| cp1250\_bin                     | cp1250        | ❌         |
+| cp1250\_croatian\_ci            | cp1250        | ❌         |
+| cp1250\_czech\_cs               | cp1250        | ❌         |
+| cp1250\_general\_ci             | cp1250        | ❌         |
+| cp1250\_polish\_ci              | cp1250        | ❌         |
+| cp1251\_bin                     | cp1251        | ❌         |
+| cp1251\_bulgarian\_ci           | cp1251        | ❌         |
+| cp1251\_general\_ci             | cp1251        | ❌         |
+| cp1251\_general\_cs             | cp1251        | ❌         |
+| cp1251\_ukrainian\_ci           | cp1251        | ❌         |
+| cp1256\_bin                     | cp1256        | ✅         |
+| cp1256\_general\_ci             | cp1256        | ✅         |
+| cp1257\_bin                     | cp1257        | ✅         |
+| cp1257\_general\_ci             | cp1257        | ✅         |
+| cp1257\_lithuanian\_ci          | cp1257        | ✅         |
+| cp850\_bin                      | cp850         | ❌         |
+| cp850\_general\_ci              | cp850         | ❌         |
+| cp852\_bin                      | cp852         | ❌         |
+| cp852\_general\_ci              | cp852         | ❌         |
+| cp866\_bin                      | cp866         | ❌         |
+| cp866\_general\_ci              | cp866         | ❌         |
+| cp932\_bin                      | cp932         | ❌         |
+| cp932\_japanese\_ci             | cp932         | ❌         |
+| dec8\_bin                       | dec8          | ✅         |
+| dec8\_swedish\_ci               | dec8          | ✅         |
+| eucjpms\_bin                    | eucjpms       | ❌         |
+| eucjpms\_japanese\_ci           | eucjpms       | ❌         |
+| euckr\_bin                      | euckr         | ❌         |
+| euckr\_korean\_ci               | euckr         | ❌         |
+| gb18030\_bin                    | gb18030       | ❌         |
+| gb18030\_chinese\_ci            | gb18030       | ❌         |
+| gb18030\_unicode\_520\_ci       | gb18030       | ❌         |
+| gb2312\_bin                     | gb2312        | ❌         |
+| gb2312\_chinese\_ci             | gb2312        | ❌         |
+| gbk\_bin                        | gbk           | ❌         |
+| gbk\_chinese\_ci                | gbk           | ❌         |
+| geostd8\_bin                    | geostd8       | ✅         |
+| geostd8\_general\_ci            | geostd8       | ✅         |
+| greek\_bin                      | greek         | ❌         |
+| greek\_general\_ci              | greek         | ❌         |
+| hebrew\_bin                     | hebrew        | ❌         |
+| hebrew\_general\_ci             | hebrew        | ❌         |
+| hp8\_bin                        | hp8           | ❌         |
+| hp8\_english\_ci                | hp8           | ❌         |
+| keybcs2\_bin                    | keybcs2       | ❌         |
+| keybcs2\_general\_ci            | keybcs2       | ❌         |
+| koi8r\_bin                      | koi8r         | ❌         |
+| koi8r\_general\_ci              | koi8r         | ❌         |
+| koi8u\_bin                      | koi8u         | ❌         |
+| koi8u\_general\_ci              | koi8u         | ❌         |
+| latin1\_bin                     | latin1        | ✅         |
+| latin1\_danish\_ci              | latin1        | ✅         |
+| latin1\_general\_ci             | latin1        | ✅         |
+| latin1\_general\_cs             | latin1        | ✅         |
+| latin1\_german1\_ci             | latin1        | ✅         |
+| latin1\_german2\_ci             | latin1        | ✅         |
+| latin1\_spanish\_ci             | latin1        | ✅         |
+| latin1\_swedish\_ci             | latin1        | ✅         |
+| latin2\_bin                     | latin2        | ❌         |
+| latin2\_croatian\_ci            | latin2        | ❌         |
+| latin2\_czech\_cs               | latin2        | ❌         |
+| latin2\_general\_ci             | latin2        | ❌         |
+| latin2\_hungarian\_ci           | latin2        | ❌         |
+| latin5\_bin                     | latin5        | ❌         |
+| latin5\_turkish\_ci             | latin5        | ❌         |
+| latin7\_bin                     | latin7        | ✅         |
+| latin7\_estonian\_cs            | latin7        | ✅         |
+| latin7\_general\_ci             | latin7        | ✅         |
+| latin7\_general\_cs             | latin7        | ✅         |
+| macce\_bin                      | macce         | ❌         |
+| macce\_general\_ci              | macce         | ❌         |
+| macroman\_bin                   | macroman      | ❌         |
+| macroman\_general\_ci           | macroman      | ❌         |
+| sjis\_bin                       | sjis          | ❌         |
+| sjis\_japanese\_ci              | sjis          | ❌         |
+| swe7\_bin                       | swe7          | ✅         |
+| swe7\_swedish\_ci               | swe7          | ✅         |
+| tis620\_bin                     | tis620        | ❌         |
+| tis620\_thai\_ci                | tis620        | ❌         |
+| ucs2\_bin                       | ucs2          | ❌         |
+| ucs2\_croatian\_ci              | ucs2          | ❌         |
+| ucs2\_czech\_ci                 | ucs2          | ❌         |
+| ucs2\_danish\_ci                | ucs2          | ❌         |
+| ucs2\_esperanto\_ci             | ucs2          | ❌         |
+| ucs2\_estonian\_ci              | ucs2          | ❌         |
+| ucs2\_general\_ci               | ucs2          | ❌         |
+| ucs2\_general\_mysql500\_ci     | ucs2          | ❌         |
+| ucs2\_german2\_ci               | ucs2          | ❌         |
+| ucs2\_hungarian\_ci             | ucs2          | ❌         |
+| ucs2\_icelandic\_ci             | ucs2          | ❌         |
+| ucs2\_latvian\_ci               | ucs2          | ❌         |
+| ucs2\_lithuanian\_ci            | ucs2          | ❌         |
+| ucs2\_persian\_ci               | ucs2          | ❌         |
+| ucs2\_polish\_ci                | ucs2          | ❌         |
+| ucs2\_roman\_ci                 | ucs2          | ❌         |
+| ucs2\_romanian\_ci              | ucs2          | ❌         |
+| ucs2\_sinhala\_ci               | ucs2          | ❌         |
+| ucs2\_slovak\_ci                | ucs2          | ❌         |
+| ucs2\_slovenian\_ci             | ucs2          | ❌         |
+| ucs2\_spanish2\_ci              | ucs2          | ❌         |
+| ucs2\_spanish\_ci               | ucs2          | ❌         |
+| ucs2\_swedish\_ci               | ucs2          | ❌         |
+| ucs2\_turkish\_ci               | ucs2          | ❌         |
+| ucs2\_unicode\_520\_ci          | ucs2          | ❌         |
+| ucs2\_unicode\_ci               | ucs2          | ❌         |
+| ucs2\_vietnamese\_ci            | ucs2          | ❌         |
+| ujis\_bin                       | ujis          | ❌         |
+| ujis\_japanese\_ci              | ujis          | ❌         |
+| utf16\_bin                      | utf16         | ✅         |
+| utf16\_croatian\_ci             | utf16         | ✅         |
+| utf16\_czech\_ci                | utf16         | ✅         |
+| utf16\_danish\_ci               | utf16         | ✅         |
+| utf16\_esperanto\_ci            | utf16         | ✅         |
+| utf16\_estonian\_ci             | utf16         | ✅         |
+| utf16\_general\_ci              | utf16         | ✅         |
+| utf16\_german2\_ci              | utf16         | ✅         |
+| utf16\_hungarian\_ci            | utf16         | ✅         |
+| utf16\_icelandic\_ci            | utf16         | ✅         |
+| utf16\_latvian\_ci              | utf16         | ✅         |
+| utf16\_lithuanian\_ci           | utf16         | ✅         |
+| utf16\_persian\_ci              | utf16         | ✅         |
+| utf16\_polish\_ci               | utf16         | ✅         |
+| utf16\_roman\_ci                | utf16         | ✅         |
+| utf16\_romanian\_ci             | utf16         | ✅         |
+| utf16\_sinhala\_ci              | utf16         | ✅         |
+| utf16\_slovak\_ci               | utf16         | ✅         |
+| utf16\_slovenian\_ci            | utf16         | ✅         |
+| utf16\_spanish2\_ci             | utf16         | ✅         |
+| utf16\_spanish\_ci              | utf16         | ✅         |
+| utf16\_swedish\_ci              | utf16         | ✅         |
+| utf16\_turkish\_ci              | utf16         | ✅         |
+| utf16\_unicode\_520\_ci         | utf16         | ✅         |
+| utf16\_unicode\_ci              | utf16         | ✅         |
+| utf16\_vietnamese\_ci           | utf16         | ✅         |
+| utf16le\_bin                    | utf16le       | ❌         |
+| utf16le\_general\_ci            | utf16le       | ❌         |
+| utf32\_bin                      | utf32         | ✅         |
+| utf32\_croatian\_ci             | utf32         | ✅         |
+| utf32\_czech\_ci                | utf32         | ✅         |
+| utf32\_danish\_ci               | utf32         | ✅         |
+| utf32\_esperanto\_ci            | utf32         | ✅         |
+| utf32\_estonian\_ci             | utf32         | ✅         |
+| utf32\_general\_ci              | utf32         | ✅         |
+| utf32\_german2\_ci              | utf32         | ✅         |
+| utf32\_hungarian\_ci            | utf32         | ✅         |
+| utf32\_icelandic\_ci            | utf32         | ✅         |
+| utf32\_latvian\_ci              | utf32         | ✅         |
+| utf32\_lithuanian\_ci           | utf32         | ✅         |
+| utf32\_persian\_ci              | utf32         | ✅         |
+| utf32\_polish\_ci               | utf32         | ✅         |
+| utf32\_roman\_ci                | utf32         | ✅         |
+| utf32\_romanian\_ci             | utf32         | ✅         |
+| utf32\_sinhala\_ci              | utf32         | ✅         |
+| utf32\_slovak\_ci               | utf32         | ✅         |
+| utf32\_slovenian\_ci            | utf32         | ✅         |
+| utf32\_spanish2\_ci             | utf32         | ✅         |
+| utf32\_spanish\_ci              | utf32         | ✅         |
+| utf32\_swedish\_ci              | utf32         | ✅         |
+| utf32\_turkish\_ci              | utf32         | ✅         |
+| utf32\_unicode\_520\_ci         | utf32         | ✅         |
+| utf32\_unicode\_ci              | utf32         | ✅         |
+| utf32\_vietnamese\_ci           | utf32         | ✅         |
+| utf8mb3\_bin                    | utf8mb3       | ✅         |
+| utf8mb3\_croatian\_ci           | utf8mb3       | ✅         |
+| utf8mb3\_czech\_ci              | utf8mb3       | ✅         |
+| utf8mb3\_danish\_ci             | utf8mb3       | ✅         |
+| utf8mb3\_esperanto\_ci          | utf8mb3       | ✅         |
+| utf8mb3\_estonian\_ci           | utf8mb3       | ✅         |
+| utf8mb3\_general\_ci            | utf8mb3       | ✅         |
+| utf8mb3\_general\_mysql500\_ci  | utf8mb3       | ✅         |
+| utf8mb3\_german2\_ci            | utf8mb3       | ✅         |
+| utf8mb3\_hungarian\_ci          | utf8mb3       | ✅         |
+| utf8mb3\_icelandic\_ci          | utf8mb3       | ✅         |
+| utf8mb3\_latvian\_ci            | utf8mb3       | ✅         |
+| utf8mb3\_lithuanian\_ci         | utf8mb3       | ✅         |
+| utf8mb3\_persian\_ci            | utf8mb3       | ✅         |
+| utf8mb3\_polish\_ci             | utf8mb3       | ✅         |
+| utf8mb3\_roman\_ci              | utf8mb3       | ✅         |
+| utf8mb3\_romanian\_ci           | utf8mb3       | ✅         |
+| utf8mb3\_sinhala\_ci            | utf8mb3       | ✅         |
+| utf8mb3\_slovak\_ci             | utf8mb3       | ✅         |
+| utf8mb3\_slovenian\_ci          | utf8mb3       | ✅         |
+| utf8mb3\_spanish2\_ci           | utf8mb3       | ✅         |
+| utf8mb3\_spanish\_ci            | utf8mb3       | ✅         |
+| utf8mb3\_swedish\_ci            | utf8mb3       | ✅         |
+| utf8mb3\_tolower\_ci            | utf8mb3       | ✅         |
+| utf8mb3\_turkish\_ci            | utf8mb3       | ✅         |
+| utf8mb3\_unicode\_520\_ci       | utf8mb3       | ✅         |
+| utf8mb3\_unicode\_ci            | utf8mb3       | ✅         |
+| utf8mb3\_vietnamese\_ci         | utf8mb3       | ✅         |
+| utf8mb4\_0900\_ai\_ci           | utf8mb4       | ✅         |
+| utf8mb4\_0900\_as\_ci           | utf8mb4       | ✅         |
+| utf8mb4\_0900\_as\_cs           | utf8mb4       | ✅         |
+| utf8mb4\_0900\_bin              | utf8mb4       | ✅         |
+| utf8mb4\_bg\_0900\_ai\_ci       | utf8mb4       | ❌         |
+| utf8mb4\_bg\_0900\_as\_cs       | utf8mb4       | ❌         |
+| utf8mb4\_bin                    | utf8mb4       | ✅         |
+| utf8mb4\_bs\_0900\_ai\_ci       | utf8mb4       | ❌         |
+| utf8mb4\_bs\_0900\_as\_cs       | utf8mb4       | ❌         |
+| utf8mb4\_croatian\_ci           | utf8mb4       | ✅         |
+| utf8mb4\_cs\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_cs\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_czech\_ci              | utf8mb4       | ✅         |
+| utf8mb4\_da\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_da\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_danish\_ci             | utf8mb4       | ✅         |
+| utf8mb4\_de\_pb\_0900\_ai\_ci   | utf8mb4       | ✅         |
+| utf8mb4\_de\_pb\_0900\_as\_cs   | utf8mb4       | ✅         |
+| utf8mb4\_eo\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_eo\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_es\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_es\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_es\_trad\_0900\_ai\_ci | utf8mb4       | ✅         |
+| utf8mb4\_es\_trad\_0900\_as\_cs | utf8mb4       | ✅         |
+| utf8mb4\_esperanto\_ci          | utf8mb4       | ✅         |
+| utf8mb4\_estonian\_ci           | utf8mb4       | ✅         |
+| utf8mb4\_et\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_et\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_general\_ci            | utf8mb4       | ✅         |
+| utf8mb4\_german2\_ci            | utf8mb4       | ✅         |
+| utf8mb4\_gl\_0900\_ai\_ci       | utf8mb4       | ❌         |
+| utf8mb4\_gl\_0900\_as\_cs       | utf8mb4       | ❌         |
+| utf8mb4\_hr\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_hr\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_hu\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_hu\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_hungarian\_ci          | utf8mb4       | ✅         |
+| utf8mb4\_icelandic\_ci          | utf8mb4       | ✅         |
+| utf8mb4\_is\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_is\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_ja\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_ja\_0900\_as\_cs\_ks   | utf8mb4       | ✅         |
+| utf8mb4\_la\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_la\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_latvian\_ci            | utf8mb4       | ✅         |
+| utf8mb4\_lithuanian\_ci         | utf8mb4       | ✅         |
+| utf8mb4\_lt\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_lt\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_lv\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_lv\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_mn\_cyrl\_0900\_ai\_ci | utf8mb4       | ❌         |
+| utf8mb4\_mn\_cyrl\_0900\_as\_cs | utf8mb4       | ❌         |
+| utf8mb4\_nb\_0900\_ai\_ci       | utf8mb4       | ❌         |
+| utf8mb4\_nb\_0900\_as\_cs       | utf8mb4       | ❌         |
+| utf8mb4\_nn\_0900\_ai\_ci       | utf8mb4       | ❌         |
+| utf8mb4\_nn\_0900\_as\_cs       | utf8mb4       | ❌         |
+| utf8mb4\_persian\_ci            | utf8mb4       | ✅         |
+| utf8mb4\_pl\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_pl\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_polish\_ci             | utf8mb4       | ✅         |
+| utf8mb4\_ro\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_ro\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_roman\_ci              | utf8mb4       | ✅         |
+| utf8mb4\_romanian\_ci           | utf8mb4       | ✅         |
+| utf8mb4\_ru\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_ru\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_sinhala\_ci            | utf8mb4       | ✅         |
+| utf8mb4\_sk\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_sk\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_sl\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_sl\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_slovak\_ci             | utf8mb4       | ✅         |
+| utf8mb4\_slovenian\_ci          | utf8mb4       | ✅         |
+| utf8mb4\_spanish2\_ci           | utf8mb4       | ✅         |
+| utf8mb4\_spanish\_ci            | utf8mb4       | ✅         |
+| utf8mb4\_sr\_latn\_0900\_ai\_ci | utf8mb4       | ❌         |
+| utf8mb4\_sr\_latn\_0900\_as\_cs | utf8mb4       | ❌         |
+| utf8mb4\_sv\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_sv\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_swedish\_ci            | utf8mb4       | ✅         |
+| utf8mb4\_tr\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_tr\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_turkish\_ci            | utf8mb4       | ✅         |
+| utf8mb4\_unicode\_520\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_unicode\_ci            | utf8mb4       | ✅         |
+| utf8mb4\_vi\_0900\_ai\_ci       | utf8mb4       | ✅         |
+| utf8mb4\_vi\_0900\_as\_cs       | utf8mb4       | ✅         |
+| utf8mb4\_vietnamese\_ci         | utf8mb4       | ✅         |
+| utf8mb4\_zh\_0900\_as\_cs       | utf8mb4       | ✅         |

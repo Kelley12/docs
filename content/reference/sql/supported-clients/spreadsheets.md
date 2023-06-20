@@ -12,7 +12,7 @@ This document assumes you are using Windows and would like to access a local Dol
 
 ### Reading from Dolt
 
-Again, this document assumes you have a local clone of a Dolt database on your computer. If you would like to read data from a database pushed to DoltHub, [the web API](../../../guides/dolthub-api/sql.md) is recommended.
+Again, this document assumes you have a local clone of a Dolt database on your computer. If you would like to read data from a database pushed to DoltHub, [the web API](https://github.com/dolthub/docs/blob/gitbook-dev/content/guides/dolthub-api/sql.md) is recommended.
 
 #### Using CSVs
 
@@ -42,7 +42,7 @@ Note, you can also export the results of a single query using `dolt sql -r csv -
 
 When importing the whole Dolt table to Excel using CSV is impractical due to size or use case, we support the Excel ODBC Connector. You can prune the data you are importing into Excel to the results of a single SQL query. Dolt is a MySQL compatible database. You can connect to it in the same way you would a running MySQL server instance.
 
-The first thing you have to do is start a Dolt SQL Server. To do this navigate to the Dolt repository directory you want to read from and run `dolt sql-server`. This command starts a MySQL compatible server on port 3306 with a user named `root`. It exposes a database named after the Dolt repository directory with dashes \(`-`\) changed to underscores \(`_`\). Thus, `dolt-test` directory name becomes `dolt_test` database name. For the purposes of this example I am running a database named `dolt_test` with user `dolt`.
+The first thing you have to do is start a Dolt SQL Server. To do this navigate to the Dolt repository directory you want to read from and run `dolt sql-server`. This command starts a MySQL compatible server on port 3306 with a user named `root`. It exposes a database named after the Dolt repository directory with dashes (`-`) changed to underscores (`_`). Thus, `dolt-test` directory name becomes `dolt_test` database name. For the purposes of this example I am running a database named `dolt_test` with user `dolt`.
 
 Now you must install the [MySQL ODBC Connector](https://dev.mysql.com/downloads/connector/odbc/) on your computer. Downloading the appropriate one and running it opens a standard Windows Installer. Once complete, navigate to `Control Panel` > `Administrative Tools` > `ODBC Data Sources` or just search for `ODBC Data Sources`. You'll be greeted by this window:
 
@@ -64,7 +64,7 @@ Dolt provides a lot of value through it's versioning features when you use it to
 
 #### Using CSVs
 
-If you have data in an Excel sheet you would like to store and version, exporting that sheet as a CSV and importing it to Dolt is a good option. In effect, you are translating and persisting the sheet as a database table. This database table contains extra information, the database schema \(ie. the data types, the constraints, etc\), that must be inferred from the sheet or defined some other way.
+If you have data in an Excel sheet you would like to store and version, exporting that sheet as a CSV and importing it to Dolt is a good option. In effect, you are translating and persisting the sheet as a database table. This database table contains extra information, the database schema (ie. the data types, the constraints, etc), that must be inferred from the sheet or defined some other way.
 
 Let's start with the simple case where you already have an existing Dolt table that is in the proper schema. Perhaps you even read the data from Dolt and you have simply modified it and want to store your changes.
 
@@ -116,7 +116,7 @@ CREATE TABLE `schema_import_test` (
 
 You can then take that output and modify it to the schema you would like. For instance, you might want to removed the `UNSIGNED` and `NOT NULL` constraints from `test_col`. Once you have the schema you want, process the `CREATE TABLE` statement through `dolt sql` and complete the import by running `dolt table import -r`.
 
-To store the above tables in Dolt as a commit, run `dolt add -A` and `dolt commit`. To send that commit to DoltHub, [set up DoltHub as a remote]() and run `dolt push`.
+To store the above tables in Dolt as a commit, run `dolt add -A` and `dolt commit`. To send that commit to DoltHub, [set up DoltHub as a remote](spreadsheets.md) and run `dolt push`.
 
 ### Accessing Dolt Versioning
 
@@ -128,7 +128,7 @@ We imagine providing this functionality through an Excel Plug In in the future. 
 
 ### Reading from Dolt
 
-This document assumes you have a local Dolt database you would like to read data from into Google Sheets. If you would like to read data from a database pushed to DoltHub, [the web API](../../../guides/dolthub-api/sql.md) is recommended.
+This document assumes you have a local Dolt database you would like to read data from into Google Sheets. If you would like to read data from a database pushed to DoltHub, [the web API](https://github.com/dolthub/docs/blob/gitbook-dev/content/guides/dolthub-api/sql.md) is recommended.
 
 #### Using CSVs
 
@@ -158,11 +158,11 @@ Note, you can also export the results of a single query using `dolt sql -r csv -
 
 When importing the whole Dolt table to Google Sheets is impractical due to size or use case, we support the Google Sheets SQL JDBC Connector. You can prune the data you are importing into your Google Sheets to the results of a single SQL query. Dolt is a MySQL compatible database. You can connect to it in the same way you would a running MySQL server instance.
 
-The first thing you have to do is start a Dolt SQL Server. To do this navigate to the Dolt repository directory you want to read from and run `dolt sql-server`. This command starts a MySQL compatible server on port 3306 with a user named `root`. It exposes a database named after the Dolt repository directory with dashes \(`-`\) changed to underscores \(`_`\). Thus, `dolt-test` directory name becomes `dolt_test` database name. For the purposes of this example I am running a database named `dolt_test` with user `dolt`.
+The first thing you have to do is start a Dolt SQL Server. To do this navigate to the Dolt repository directory you want to read from and run `dolt sql-server`. This command starts a MySQL compatible server on port 3306 with a user named `root`. It exposes a database named after the Dolt repository directory with dashes (`-`) changed to underscores (`_`). Thus, `dolt-test` directory name becomes `dolt_test` database name. For the purposes of this example I am running a database named `dolt_test` with user `dolt`.
 
-Once you have a running Dolt MySQL-compatible server, you need to open the port it is running on to the internet. If your Dolt sql-server is already running on a host accessible via the internet, you can skip this step. To do this on a home or employer network, we recommend using [ngrok](https://ngrok.com/). `ngrok` is a hosted service that allows you to open a port on your computer to the internet fairly painlessly. First [follow the ngrok installation instructions](https://dashboard.ngrok.com/get-started/setup) for your operating system. Then run `ngrok tcp 3306` \(or substitute 3306 for whichever port you started the sql-server on\). This will start a program with the following output in your terminal:
+Once you have a running Dolt MySQL-compatible server, you need to open the port it is running on to the internet. If your Dolt sql-server is already running on a host accessible via the internet, you can skip this step. To do this on a home or employer network, we recommend using [ngrok](https://ngrok.com/). `ngrok` is a hosted service that allows you to open a port on your computer to the internet fairly painlessly. First [follow the ngrok installation instructions](https://dashboard.ngrok.com/get-started/setup) for your operating system. Then run `ngrok tcp 3306` (or substitute 3306 for whichever port you started the sql-server on). This will start a program with the following output in your terminal:
 
-```text
+```
 ngrok by @inconshreveable                                       (Ctrl+C to quit)
 
 Session Status                online
@@ -184,7 +184,7 @@ Lastly, you use the Google Sheets Script editor to read the data from Dolt over 
 
 Paste the following code into the script editor:
 
-```text
+```
 var server    = '0.tcp.ngrok.io';
 var dbName    = 'dolt_test';
 var username  = 'dolt';
@@ -244,7 +244,7 @@ Dolt provides a lot of value through it's versioning features when you use it to
 
 #### Using CSVs
 
-If you have data in a Google Sheet you would like to store and version, exporting that sheet as a CSV and importing it to Dolt is a good option. In effect, you are translating and persisting the sheet as a database table. This database table contains extra information, the database schema \(ie. the data types, the constraints, etc\), that must be inferred from the sheet or defined some other way.
+If you have data in a Google Sheet you would like to store and version, exporting that sheet as a CSV and importing it to Dolt is a good option. In effect, you are translating and persisting the sheet as a database table. This database table contains extra information, the database schema (ie. the data types, the constraints, etc), that must be inferred from the sheet or defined some other way.
 
 Let's start with the simple case where you already have an existing Dolt table that is in the proper schema. Perhaps you even read the data from Dolt and you have simply modified it and want to store your changes.
 
@@ -296,7 +296,7 @@ CREATE TABLE `schema_import_test` (
 
 You can then take that output and modify it to the schema you would like. For instance, you might want to removed the `UNSIGNED` and `NOT NULL` constraints from `test_col`. Once you have the schema you want, process the `CREATE TABLE` statement through `dolt sql` and complete the import by running `dolt table import -r`.
 
-To store the above tables in Dolt as a commit, run `dolt add -A` and `dolt commit`. To send that commit to DoltHub, [set up DoltHub as a remote]() and run `dolt push`.
+To store the above tables in Dolt as a commit, run `dolt add -A` and `dolt commit`. To send that commit to DoltHub, [set up DoltHub as a remote](spreadsheets.md) and run `dolt push`.
 
 #### Using SQL JDBC Connector
 

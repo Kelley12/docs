@@ -18,11 +18,9 @@ To increase read throughput, multiple replicas can be used to scale reads horizo
 
 ## Differences between MySQL Replication and Dolt Replication
 
-[MySQL supports multiple types of replication](https://dev.mysql.com/doc/refman/8.0/en/replication.html), most based on the [MySQL binary log](https://dev.mysql.com/doc/refman/8.0/en/replication-howto.html). Dolt supports a [MySQL binlog replication mode](../../../guides/binlog-replication.md), where you configure a Dolt sql-server as a replica for an existing MySQL or MariaDB database. Dolt does not create binary logs and can **NOT** act as a primary for binlog replication. 
+[MySQL supports multiple types of replication](https://dev.mysql.com/doc/refman/8.0/en/replication.html), most based on the [MySQL binary log](https://dev.mysql.com/doc/refman/8.0/en/replication-howto.html). Dolt supports a [MySQL binlog replication mode](../../../guides/binlog-replication.md), where you configure a Dolt sql-server as a replica for an existing MySQL or MariaDB database. Dolt does not create binary logs and can **NOT** act as a primary for binlog replication.
 
-Dolt supports two replication modes where Dolt can act as a primary and replicate to other Dolt sql-servers. The first is called 
-[Remote-Based Replication](../../../reference/sql/server/replication.md#replication-through-a-remote). In this mode the primary and the read replicas are completely decoupled. The primary and the read replicas leverage a
-shared, Git-style [remote](../git/remotes.md) to facilitate replication. On the primary, you configure "push on write" and on the replicas you configure "pull on read".  This mode only replicates branch heads, which means that new dolt commits are required in order to replicate writes.
+Dolt supports two replication modes where Dolt can act as a primary and replicate to other Dolt sql-servers. The first is called [Remote-Based Replication](../../../reference/sql/server/replication.md#replication-through-a-remote). In this mode the primary and the read replicas are completely decoupled. The primary and the read replicas leverage a shared, Git-style [remote](../git/remotes.md) to facilitate replication. On the primary, you configure "push on write" and on the replicas you configure "pull on read". This mode only replicates branch heads, which means that new dolt commits are required in order to replicate writes.
 
 The second mode is called [Direct-to-Standby Replication](../../../reference/sql/server/replication.md#direct-to-standby-replication). In this mode, you configure a cluster of dolt sql-server instances to replicate **all** writes to each other. Each server is configured to replicate writes to all other servers in the cluster. One server is configured as the primary replica and it accepts writes. All other servers are configured as standbys and only accept read requests.
 
@@ -36,7 +34,7 @@ The following example shows write replication from a primary and read replicas u
 
 ### Configuring a Primary
 
-In this example I use a DoltHub remote to facilitate replication. I created an empty database on DoltHub and [configured the appropriate read and write credentials on this host](../../../introduction/getting-started/data-sharing.md#dolt-login).
+In this example I use a DoltHub remote to facilitate replication. I created an empty database on DoltHub and [configured the appropriate read and write credentials on this host](https://github.com/dolthub/docs/blob/gitbook-dev/content/introduction/getting-started/data-sharing.md#dolt-login).
 
 ```bash
 $ dolt remote add origin timsehn/replication_example
@@ -59,7 +57,7 @@ The changes are pushed to the remote.
 
 ## Configuring a Replica
 
-To start a replica, you first need a clone. 
+To start a replica, you first need a clone.
 
 ```bash
 $ dolt clone timsehn/replication_example read_replica
