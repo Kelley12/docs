@@ -2,7 +2,7 @@
 title: Stored Procedures
 ---
 
-# Stored Procedures
+# Procedures
 
 ## What is a Stored Procedure?
 
@@ -16,9 +16,9 @@ Stored Procedures are used to store code you want the database to execute when a
 
 ## Difference between MySQL Stored Procedures and Dolt Stored Procedures
 
-Dolt stored procedures match MySQL stored procedures exactly. 
+Dolt stored procedures match MySQL stored procedures exactly.
 
-Dolt exposes custom [stored procedures for version control operations](../../../reference/sql/version-control/dolt-sql-procedures.md). These are named after the corresponding Dolt commands.  
+Dolt exposes custom [stored procedures for version control operations](../../../sql-reference/version-control/dolt-sql-procedures.md). These are named after the corresponding Dolt commands.
 
 ## Interaction with Dolt Version Control
 

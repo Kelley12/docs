@@ -2,112 +2,68 @@
 title: FAQ
 ---
 
-## Why is it called Dolt? Are you calling me dumb?
+# FAQ
 
-It's named `dolt` to pay homage to [how Linus Torvalds named
-git](https://en.wikipedia.org/wiki/Git#Naming):
+### Why is it called Dolt? Are you calling me dumb?
 
-> Torvalds sarcastically quipped about the name git (which means
-> "unpleasant person" in British English slang): "I'm an egotistical
-> bastard, and I name all my projects after myself. First 'Linux',
-> now 'git'."
+It's named `dolt` to pay homage to [how Linus Torvalds named git](https://en.wikipedia.org/wiki/Git#Naming):
 
-We wanted a word meaning "idiot", starting with D for Data,
-short enough to type on the command line, and
-not taken in the standard command line lexicon. So,
-`dolt`.
+> Torvalds sarcastically quipped about the name git (which means "unpleasant person" in British English slang): "I'm an egotistical bastard, and I name all my projects after myself. First 'Linux', now 'git'."
 
-## Dolt is MySQL-compatible. I use Postgres?
+We wanted a word meaning "idiot", starting with D for Data, short enough to type on the command line, and not taken in the standard command line lexicon. So, `dolt`.
 
-Dolt is MySQL-compatible. Dolt is a replacement for MySQL or Postgres.
-[Dolt does not contain any MySQL code](../architecture/architecture.md)
-but you connect to it with a MySQL client. It is usually not difficult
-to convert Postgres SQL to MySQL SQL.
+### Dolt is MySQL-compatible. I use Postgres?
 
-All that said, many people have asked for a Postgres-flavored version
-of Dolt. We published [a blog responding to this request](https://www.dolthub.com/blog/2022-03-28-have-postgres-want-dolt/)
-and made [the Postgres `msql_fdw` work with Dolt](https://www.dolthub.com/blog/2023-04-12-dolt-with-mysql_fdw/). We support an [open source `pg2mysql` tool](https://github.com/dolthub/pg2mysql) to convert Postgres dumps to MySQL dumps.
+Dolt is MySQL-compatible. Dolt is a replacement for MySQL or Postgres. [Dolt does not contain any MySQL code](../architecture/architecture.md) but you connect to it with a MySQL client. It is usually not difficult to convert Postgres SQL to MySQL SQL.
 
-We investigated plugging [Dolt's storage layer](../architecture/storage-engine.md) into Postgres using the [foreign data wrapper interface](https://www.dolthub.com/blog/2022-01-26-creating-a-postgres-foreign-data-wrapper/) to make a true [DoltgreSQL](https://www.doltgresql.com). Building this would take a year or so. We need the MySQL-flavored version of Dolt to get enough adoption to fund the DoltgreSQL project.
+All that said, many people have asked for a Postgres-flavored version of Dolt. We published [a blog responding to this request](https://www.dolthub.com/blog/2022-03-28-have-postgres-want-dolt/) and made [the Postgres `msql_fdw` work with Dolt](https://www.dolthub.com/blog/2023-04-12-dolt-with-mysql\_fdw/). We support an [open source `pg2mysql` tool](https://github.com/dolthub/pg2mysql) to convert Postgres dumps to MySQL dumps.
 
-## What does `@@autocommit` do?
+We investigated plugging [Dolt's storage layer](../architecture/storage-engine/) into Postgres using the [foreign data wrapper interface](https://www.dolthub.com/blog/2022-01-26-creating-a-postgres-foreign-data-wrapper/) to make a true [DoltgreSQL](https://www.doltgresql.com). Building this would take a year or so. We need the MySQL-flavored version of Dolt to get enough adoption to fund the DoltgreSQL project.
+
+### What does `@@autocommit` do?
 
 This is a SQL variable that you can turn on for your SQL session like so:
 
 `SET @@autocommit = 1`
 
-It's on by default in the MySQL shell, as well as in most clients. But
-some clients (notably the Python MySQL connector) turn it off by
-default.
+It's on by default in the MySQL shell, as well as in most clients. But some clients (notably the Python MySQL connector) turn it off by default.
 
-You must commit your changes for them to persist after your session
-ends, either by setting `@@autocommit` to on, or by issuing `COMMIT`
-statements manually.
+You must commit your changes for them to persist after your session ends, either by setting `@@autocommit` to on, or by issuing `COMMIT` statements manually.
 
-## What's the difference between `COMMIT` and `DOLT_COMMIT()`?
+### What's the difference between `COMMIT` and `DOLT_COMMIT()`?
 
-`COMMIT` is a standard SQL statement that commits a transaction. In
-dolt, it just flushes any pending changes in the current SQL session
-to disk, updating the working set. HEAD stays the same, but your
-working set changes. This means your edits will persist after this
-session ends.
+`COMMIT` is a standard SQL statement that commits a transaction. In dolt, it just flushes any pending changes in the current SQL session to disk, updating the working set. HEAD stays the same, but your working set changes. This means your edits will persist after this session ends.
 
-`DOLT_COMMIT()` commits the current SQL transaction, then creates a
-new dolt commit on the current branch. It's the same as if you run
-`dolt commit` from the command line.
+`DOLT_COMMIT()` commits the current SQL transaction, then creates a new dolt commit on the current branch. It's the same as if you run `dolt commit` from the command line.
 
-## I want each of my connected SQL users to get their own branch to make changes on, then merge them back into `main` when they're done making edits. How do I do that?
+### I want each of my connected SQL users to get their own branch to make changes on, then merge them back into `main` when they're done making edits. How do I do that?
 
-We are glad you asked! This is a common use case, and giving each user
-their own branch is something we've spent a lot of time getting
-right. For more details on how to use this pattern effectively, see
-[using branches](../reference/sql/version-control/branches.md).
+We are glad you asked! This is a common use case, and giving each user their own branch is something we've spent a lot of time getting right. For more details on how to use this pattern effectively, see [using branches](../sql-reference/version-control/branches.md).
 
-## Does Dolt support transactions?
+### Does Dolt support transactions?
 
-Yes, it should exactly work the same as MySQL, but with fewer locks
-for competing writes.
+Yes, it should exactly work the same as MySQL, but with fewer locks for competing writes.
 
-It's also possible for different sessions to connect to different
-branches on the same server. See [using
-branches](../reference/sql/version-control/branches.md) for details.
+It's also possible for different sessions to connect to different branches on the same server. See [using branches](../sql-reference/version-control/branches.md) for details.
 
-## What SQL features / syntax are supported?
+### What SQL features / syntax are supported?
 
-Most of them! Check out [the docs for the full list of supported
-features](../reference/sql/sql-support/supported-statements.md).
+Most of them! Check out [the docs for the full list of supported features](../sql-reference/sql-support/supported-statements.md).
 
-You can check out what we're working on next on our
-[roadmap](./roadmap.md). Paying customers get their feature requests
-bumped to the front of the line.
+You can check out what we're working on next on our [roadmap](roadmap.md). Paying customers get their feature requests bumped to the front of the line.
 
-## Does Dolt support my favorite SQL workbench / tool?
+### Does Dolt support my favorite SQL workbench / tool?
 
-Probably! Have you tried it? If you try it and it doesn't work, [let
-us know with an issue](https://github.com/dolthub/dolt/issues) or in
-[our Discord](https://discord.gg/s8uVgc3) and we'll see what
-we can do. A lot of times we can fix small compatibility issues really
-quick, like the same week. And even if we can't, we want to know about
-it! Our goal is to be a 100% drop-in replacement for MySQL.
+Probably! Have you tried it? If you try it and it doesn't work, [let us know with an issue](https://github.com/dolthub/dolt/issues) or in [our Discord](https://discord.gg/s8uVgc3) and we'll see what we can do. A lot of times we can fix small compatibility issues really quick, like the same week. And even if we can't, we want to know about it! Our goal is to be a 100% drop-in replacement for MySQL.
 
-## How does Dolt Docs work? What happened to my `README.md` and `LICENSE.md`?
+### How does Dolt Docs work? What happened to my `README.md` and `LICENSE.md`?
 
-Previously, Dolt automatically synced doc files from the file system to the
-`dolt_docs` table. This process is now manual and performed with the `dolt docs`
-CLI command. `dolt docs upload [doc name] [file name]` reads a file into the
-`dolt_docs` table with the given name. `dolt docs print [doc name]` prints a
-doc with the given name to stdout.
+Previously, Dolt automatically synced doc files from the file system to the `dolt_docs` table. This process is now manual and performed with the `dolt docs` CLI command. `dolt docs upload [doc name] [file name]` reads a file into the `dolt_docs` table with the given name. `dolt docs print [doc name]` prints a doc with the given name to stdout.
 
-## How do I squash the history of a Dolt database? I only want the latest.
+### How do I squash the history of a Dolt database? I only want the latest.
 
-Dolt has a command called [read-tables](../reference/cli.md#dolt-read-tables) 
-that reads the tables at a remote, commit pair and creates a new Dolt database 
-without any history. This new database is often much smaller than the database 
-it was created from. Note, this new database cannot be merged with the database 
-it was created from. It is a new thing.
+Dolt has a command called [read-tables](../cli-reference/cli.md#dolt-read-tables) that reads the tables at a remote, commit pair and creates a new Dolt database without any history. This new database is often much smaller than the database it was created from. Note, this new database cannot be merged with the database it was created from. It is a new thing.
 
-Note, a remote can be local to your filesystem using 
-[filesystem remotes](../reference/sql/version-control/remotes.md#filesystem). 
+Note, a remote can be local to your filesystem using [filesystem remotes](../sql-reference/version-control/remotes.md#filesystem).
 
-You can also [`dolt dump`](../reference/cli.md#dolt-dump) the database and import 
-the dump to a new database using [`dolt sql`](../reference/cli.md#dolt-sql).
+You can also [`dolt dump`](../cli-reference/cli.md#dolt-dump) the database and import the dump to a new database using [`dolt sql`](../cli-reference/cli.md#dolt-sql).

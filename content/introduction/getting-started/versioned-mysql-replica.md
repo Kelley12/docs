@@ -2,15 +2,17 @@
 title: Versioned MySQL Replica
 ---
 
-Dolt can be configured as a MySQL Replica. 
+# Versioned MySQL Replica
+
+Dolt can be configured as a MySQL Replica.
 
 In this mode, you set up Dolt to replicate a primary MySQL. Set up can take as as little as three commands. After set up, Dolt replicates every write to your primary to Dolt and creates a Dolt commit, giving you time travel, lineage, rollback, and other [database version control](https://www.dolthub.com/blog/2021-09-17-database-version-control/) features on your Dolt replica.
 
 This document will walk you through step-by-step on how to get Dolt running as a MySQL replica on your host. It will show off some unique version control features you get in this set up, including finding and fixing a bad change on primary.
 
-# Start a Local MySQL Server
+## Start a Local MySQL Server
 
-First, we need a running MySQL instance. We'll consider this our "primary" database. 
+First, we need a running MySQL instance. We'll consider this our "primary" database.
 
 I use homebrew on my Mac. To get MySQL and start it, I open a terminal and run:
 
@@ -40,7 +42,7 @@ mysql>
 
 Simple enough. Keep that open. You're going to need it.
 
-# Prepare Your Primary MySQL for a Replica
+## Prepare Your Primary MySQL for a Replica
 
 Now, you have to prepare MySQL to have a replica. This requires the following configuration which are on by default. So, don't touch these if you're starting fresh like me.
 
@@ -84,9 +86,9 @@ mysql> SHOW VARIABLES WHERE Variable_Name LIKE '%gtid_mode' OR Variable_Name LIK
 
 You're now ready to configure a Dolt replica.
 
-# Install Dolt
+## Install Dolt
 
-Dolt is a single ~68 megabyte program.
+Dolt is a single \~68 megabyte program.
 
 ```bash
 $ du -h /Users/timsehn//go/bin/dolt
@@ -101,7 +103,7 @@ Here is a convenience script that does that for `*NIX` platforms. Open a termina
 sudo bash -c 'curl -L https://github.com/dolthub/dolt/releases/latest/download/install.sh | sudo bash'
 ```
 
-# Start a Dolt SQL Server
+## Start a Dolt SQL Server
 
 Dolt needs a place to put your databases. I put mine in `~/dolt_replica`.
 
@@ -121,7 +123,7 @@ Starting server with Config HP="localhost:1234"|T="28800000"|R="false"|L="debug"
 
 The shell will just hang there. That means Dolt is running. Any errors you encounter running Dolt will be printed here. Because we're in debug mode, you can also see the queries run against the server in this log.
 
-# Configure Dolt as a Replica
+## Configure Dolt as a Replica
 
 Open a new terminal and connect a MySQL client to your running Dolt just like you did to MySQL above, but this time specify port `1243` and host `127.0.0.1` to force MySQL through the TCP interface. Without the host specified it will connect using the socket interface to your running MySQL, not Dolt like you want.
 
@@ -142,7 +144,7 @@ Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 mysql>
 ```
 
-Now you need to run three commands. First, make sure the replica server has a unique `server_id` not used by any source or other replicas in our system. We'll use `2'.
+Now you need to run three commands. First, make sure the replica server has a unique `server_id` not used by any source or other replicas in our system. We'll use \`2'.
 
 ```sql
 mysql> SET @@GLOBAL.SERVER_ID=2;
@@ -177,7 +179,7 @@ If you look at the logs in the Dolt terminal, you should see something like this
 
 You now have a Dolt replica of a running MySQL! If you have any data in the `binlog` of the MySQL (ie. you didn't start from scratch), that data will replicate over to Dolt right now.
 
-# Write Something on the Primary
+## Write Something on the Primary
 
 Now it's time to test out what you created. We'll start by creating a databases and a table.
 
@@ -221,9 +223,9 @@ You can see the queries replicating in the Dolt log:
 2023-03-13T11:34:30-07:00 DEBUG [no conn] Received binlog event: XID {connectionDb=foo}
 ```
 
-All seems to be working. 
+All seems to be working.
 
-# Inspect the Replica
+## Inspect the Replica
 
 Let's hop over to the `mysql` client connected to Dolt and inspect it just to make sure.
 
@@ -252,11 +254,11 @@ mysql> select * from t;
 
 The new database `foo` and the table `t` along with it's single row have replicated.
 
-# Inspect the Commit Log
+## Inspect the Commit Log
 
 Now to show off the first new feature, the Dolt Commit log. The Dolt replica makes a Dolt commit after every transaction sent from the primary so you can see what changed and when.
 
-Dolt has a number of [system tables](../../reference/sql/version-control/dolt-system-tables.md#database-history-system-tables), [functions](../../reference/sql/version-control/dolt-sql-functions.md#table-functions), and [procedures](../../reference/sql/version-control/dolt-sql-procedures.md) to expose the version control features. These tables, functions, and procedures are inspired by their Git equivalents, so `git log` becomes the `dolt_log` system table. 
+Dolt has a number of [system tables](../../sql-reference/version-control/dolt-system-tables.md#database-history-system-tables), [functions](../../sql-reference/version-control/dolt-sql-functions.md#table-functions), and [procedures](../../sql-reference/version-control/dolt-sql-procedures.md) to expose the version control features. These tables, functions, and procedures are inspired by their Git equivalents, so `git log` becomes the `dolt_log` system table.
 
 ```sql
 mysql> select * from dolt_log;
@@ -272,9 +274,9 @@ mysql> select * from dolt_log;
 
 As you can see, we have a full audit history of the database going back to inception. That should be useful.
 
-# Inspect a Diff
+## Inspect a Diff
 
-Let's see what happened in the last transaction. I'm going to see what changed in table in the last commit using the [`dolt_diff()` table function](../../reference/sql/version-control/dolt-sql-functions.md#dolt_diff).
+Let's see what happened in the last transaction. I'm going to see what changed in table in the last commit using the [`dolt_diff()` table function](../../sql-reference/version-control/dolt-sql-functions.md#dolt\_diff).
 
 ```sql
 mysql> select * from dolt_diff('t3bp704udfjcuo83hb7qjat8ltv1osea', 'h9hsr5ij8u9gml4nkqenm8alep1la1r9', 't');
@@ -287,13 +289,13 @@ mysql> select * from dolt_diff('t3bp704udfjcuo83hb7qjat8ltv1osea', 'h9hsr5ij8u9g
 
 It looks like `c1` and `c2` both went from `NULL` to `0` in that commit, just as we'd expect. With a Dolt replica, you get a queryable audit log of every cell in your database.
 
-# A Bigger Database...
+## A Bigger Database...
 
-Now, let's examine a more interesting database. This time, I'm going to use [`https://github.com/datacharmer/test_db`](https://github.com/datacharmer/test_db) recommended by [MySQL](https://dev.mysql.com/doc/index-other.html). As the [README says](https://github.com/datacharmer/test_db/blob/master/README.md):
+Now, let's examine a more interesting database. This time, I'm going to use [`https://github.com/datacharmer/test_db`](https://github.com/datacharmer/test\_db) recommended by [MySQL](https://dev.mysql.com/doc/index-other.html). As the [README says](https://github.com/datacharmer/test\_db/blob/master/README.md):
 
 > The export data is 167 MB, which is not huge, but heavy enough to be non-trivial for testing.
 
-First, I clone the GitHub repo and import the data to my running MySQL using the [provided instructions](https://github.com/datacharmer/test_db/blob/master/README.md) in the test_db repository.
+First, I clone the GitHub repo and import the data to my running MySQL using the [provided instructions](https://github.com/datacharmer/test\_db/blob/master/README.md) in the test\_db repository.
 
 ```bash
 $ git clone git@github.com:datacharmer/test_db.git
@@ -361,7 +363,7 @@ mysql> show tables;
 8 rows in set (0.00 sec)
 ```
 
-# Make a bad change
+## Make a bad change
 
 Now, let's do something crazy. We're going to mix a bad change in with a couple good changes and use the Dolt replica to find and revert the change.
 
@@ -474,11 +476,11 @@ Query OK, 2 rows affected (0.00 sec)
 Records: 2  Duplicates: 0  Warnings: 0
 ```
 
-# Find a bad change
+## Find a bad change
 
 Let's say in this case, people are reporting their historical salaries have changed. We have a clue that something is wrong in the database. Let's head over to the Dolt replica and see what's up.
 
-First, we want to find the changes in the last 10 transactions that touched the salaries table. To do this we use the unscoped [`dolt_diff` table](../../reference/sql/version-control/dolt-system-tables.md#dolt_diff) to see what tables changes in each commit.
+First, we want to find the changes in the last 10 transactions that touched the salaries table. To do this we use the unscoped [`dolt_diff` table](../../sql-reference/version-control/dolt-system-tables.md#dolt\_diff) to see what tables changes in each commit.
 
 ```sql
 mysql> select * from dolt_diff where table_name='salaries' limit 10;
@@ -547,11 +549,11 @@ mysql> select * from dolt_diff('4te2i1qheceek434m3uoqsuejfv6f0nu', '123d9jc85evs
 
 Take a minute to marvel at what we just did. We were able to identify what changed from a `update salaries set salary=salary-1 order by rand() limit 5;` query all using queryable system tables on a replica. What a time to be alive! Now let's revert the change.
 
-# Revert a bad change
+## Revert a bad change
 
-If you were running Dolt as the primary database, reverting a bad change is as simple as calling [`dolt_revert()`](../../reference/sql/version-control/dolt-sql-procedures.md#dolt_revert). But since we're running Dolt as a replica, we need Dolt to produce a SQL patch to revert the bad changes. To do this, we're going to make a branch on the replica, revert the change, and then use the [`dolt_patch()` function](../../reference/sql/version-control/dolt-sql-functions.md#dolt_patch) to get the SQL we need to apply to our primary database.
+If you were running Dolt as the primary database, reverting a bad change is as simple as calling [`dolt_revert()`](../../sql-reference/version-control/dolt-sql-procedures.md#dolt\_revert). But since we're running Dolt as a replica, we need Dolt to produce a SQL patch to revert the bad changes. To do this, we're going to make a branch on the replica, revert the change, and then use the [`dolt_patch()` function](../../sql-reference/version-control/dolt-sql-functions.md#dolt\_patch) to get the SQL we need to apply to our primary database.
 
-First, we use [`call dolt_checkout()`](../../reference/sql/version-control/dolt-sql-procedures.md#dolt_checkout) to create a branch. Our revert changes will now be isolated from the replicating branch, `main`.
+First, we use [`call dolt_checkout()`](../../sql-reference/version-control/dolt-sql-procedures.md#dolt\_checkout) to create a branch. Our revert changes will now be isolated from the replicating branch, `main`.
 
 ```sql
 mysql> call dolt_checkout('-b', 'revert_bad_change');
@@ -563,7 +565,7 @@ mysql> call dolt_checkout('-b', 'revert_bad_change');
 1 row in set (0.02 sec)
 ```
 
-Then we revert the bad commit using [`call dolt_revert()`](../../reference/sql/version-control/dolt-sql-procedures.md#dolt_revert).
+Then we revert the bad commit using [`call dolt_revert()`](../../sql-reference/version-control/dolt-sql-procedures.md#dolt\_revert).
 
 ```sql
 mysql> call dolt_revert('123d9jc85evssjcrv6u5mlt5dg4lk6ss');
@@ -587,7 +589,7 @@ mysql> select * from dolt_diff('HEAD^', 'HEAD', 'salaries');
 5 rows in set (0.00 sec)
 ```
 
-We use the [`dolt_patch()`](../../reference/sql/version-control/dolt-sql-functions.md#dolt_patch) function to generate the sql we want to run on our primary.
+We use the [`dolt_patch()`](../../sql-reference/version-control/dolt-sql-functions.md#dolt\_patch) function to generate the sql we want to run on our primary.
 
 ```sql
 mysql> call dolt_patch('HEAD^', 'HEAD');
@@ -644,4 +646,4 @@ mysql> select * from dolt_diff('main', 'revert_bad_change', 'salaries');
 Empty set (0.00 sec)
 ```
 
-Phew, that was pretty awesome. I was able to find a bad change using my Dolt replica, generate a patch to revert it on my primary, apply the patch, and make sure everything was right with the world again. With a Dolt replica, you never have to worry about bad administrator queries again! 
+Phew, that was pretty awesome. I was able to find a bad change using my Dolt replica, generate a patch to revert it on my primary, apply the patch, and make sure everything was right with the world again. With a Dolt replica, you never have to worry about bad administrator queries again!

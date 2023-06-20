@@ -2,7 +2,9 @@
 title: Architecture
 ---
 
-# Architecture
+# Overview
+
+## Architecture
 
 Dolt is the world's first version controlled SQL database.
 
@@ -10,7 +12,7 @@ How would you build a version controlled SQL database? We will start with some o
 
 ![](../.gitbook/assets/architecture-icon.png)
 
-# Requirements
+## Requirements
 
 Dolt started with the idea that data was too hard to share. "Share" is a loaded word here. Share in this context means distribute, collaborate on, change, buy, and sell.
 
@@ -24,39 +26,39 @@ Much farther along on the journey of building Dolt we realized a version control
 
 So, to recap, to make data sharing easier, we needed a modern SQL relational database with version control capabilities in the style of Git. Let's break those two requirements a bit further.
 
-## SQL Database
+### SQL Database
 
 ![](../.gitbook/assets/sql-icon.png)
 
-### Tables
+#### Tables
 
 A SQL database is a collection of tables. Tables have rows and columns. The columns have schema: names, types, and constraints. Columns can have indexes to improve query performance. Advanced database features like views, stored procedures, and triggers would also be useful. Tables must be able to be accessed via standard SQL select, insert, update, and delete queries. We could implement our own flavor of the SQL standard or we could adopt an existing standard. Adopting an existing standard was preferable so all the tools that work with that standard would also work with Dolt.
 
-### Performance at Scale
+#### Performance at Scale
 
 A modern relational database must be performant at large scale. In particular, sub-linear worst case scaling on seek (ie. select) is a must.
 
-### Concurrent Access
+#### Concurrent Access
 
 Modern databases support concurrent access via multiple clients. Dolt could work like SQLite and provide concurrent access directly to storage via a library. Or Dolt could work like Postgres or MySQL providing a server and concurrent access via clients over a network connection. We preferred the Postgres or MySQL model because it seemed more popular.
 
-## Version Control
+### Version Control
 
 ![](../.gitbook/assets/version-control-icon.png)
 
-### Storage Compression
+#### Storage Compression
 
 To offer version control in a database, all versions of the data must be stored. Storing a full copy of the database at every change is untenable. Data that does not change between versions must share storage.
 
-### Fast diff
+#### Fast diff
 
 Comparing and producing the differences between two versions must be fast. Displaying diffs to a user is a common operation. Querying diffs must also be supported and should be as fast as a regular select query. Moreover, merge relies on diffs so fast diff is essential for merge operations at scale.
 
-### Single Program
+#### Single Program
 
 We also wanted to mimic the Git command line interface but for data. Git is intended to be used in a decentralized manner. Every user has a copy of Git and the files Git is operating on on their local machine. We wanted to keep this model with Dolt. So, we wanted Dolt to be a single, easily installed program.
 
-# Where we Started
+## Where we Started
 
 In order to satisfy the version control requirements of storage compression and fast diff, we knew we would need our own storage engine. There was no way to adapt standard B-tree based database storage engines to the version control task.
 
@@ -64,7 +66,7 @@ Could Git be adapted to be a storage engine for a database? [Other people have t
 
 To achieve the SQL database requirements, we looked at the most popular open source options: MySQL and Postgres. Both [MySQL](https://dev.mysql.com/doc/refman/8.0/en/storage-engines.html) and [Postgres](https://www.dolthub.com/blog/2022-01-26-creating-a-postgres-foreign-data-wrapper/) have pluggable storage engines. But how would we access the version control properties of the storage engine? We needed more control over the supported SQL dialect than MySQL or Postgres exposed.
 
-# Oh God. You built a SQL database from scratch?!?
+## Oh God. You built a SQL database from scratch?!?
 
 Not really. We leveraged three existing open source packages:
 
@@ -78,11 +80,11 @@ Dolt itself implements all the glue code to stitch these three open source proje
 
 We've been working on Dolt since 2018. We've forked and heavily modified all three of these packages since to fit our use case. Our forks are [also open source](https://github.com/dolthub).
 
-## Noms
+### Noms
 
 ![](../.gitbook/assets/noms.png)
 
-[Noms](https://github.com/attic-labs/noms) pioneered a data storage engine with Git properties. Noms built a content-addressed B-tree called a [Prolly tree](./storage-engine/prolly-tree.md) that had seek performance characteristics of a B-tree but also provided fast diff. You could stick the root content addresses of Prolly trees in a Merkle DAG to achieve versioning similar to Git with shared storage across versions.
+[Noms](https://github.com/attic-labs/noms) pioneered a data storage engine with Git properties. Noms built a content-addressed B-tree called a [Prolly tree](storage-engine/prolly-tree.md) that had seek performance characteristics of a B-tree but also provided fast diff. You could stick the root content addresses of Prolly trees in a Merkle DAG to achieve versioning similar to Git with shared storage across versions.
 
 Noms was implemented in Golang. Dolt was implemented in Golang to take advantage of Noms work. Additionally, Golang is compiled so we could ship Dolt as a single program, satisfying that requirement.
 
@@ -90,7 +92,7 @@ We initially worked on a fork of Noms to build Dolt. [The Noms team had moved on
 
 We heavily modified Noms to fit the SQL database use case. We kept the Noms model but traded the flexibility of Noms for throughput in our more specific SQL database use case. Optimizing for this specific use case allowed us to [increase performance by an order of magnitude](https://www.dolthub.com/blog/2023-05-05-dolt-1-dot-0/#production-performance).
 
-## `go-mysql-server`
+### `go-mysql-server`
 
 ![](../.gitbook/assets/go-mysql-server-small.png)
 
@@ -98,19 +100,19 @@ Originally developed by [src-d](https://github.com/src-d), [`go-mysql-server`](h
 
 Since we adopted `go-mysql-server`, we have added support for triggers, check constraints, character sets, collations, and many more features. We've also improved join performance and correctness by improving the analyzer. `go-mysql-server` is fast becoming a modern, credible SQL engine.
 
-`go-mysql-server` allowed Dolt full control of the SQL dialect and engine while also allowing Dolt to be a single compiled Golang program. We implemented [custom procedures for version control write operations](../reference/sql/version-control/dolt-sql-procedures.md) and custom [system tables and functions for version control read operations](../reference/sql/version-control/dolt-system-tables.md). No Postgres flavored alternative allowing for this level of control existed so Dolt is MySQL flavored.
+`go-mysql-server` allowed Dolt full control of the SQL dialect and engine while also allowing Dolt to be a single compiled Golang program. We implemented [custom procedures for version control write operations](../sql-reference/version-control/dolt-sql-procedures.md) and custom [system tables and functions for version control read operations](../sql-reference/version-control/dolt-system-tables.md). No Postgres flavored alternative allowing for this level of control existed so Dolt is MySQL flavored.
 
 Most other users of `go-mysql-server` use it to test their MySQL applications without a running MySQL server. We're the only people we know of intrepid enough to build a full-fledged database on top of it.
 
-## Vitess
+### Vitess
 
 ![](../.gitbook/assets/vitess-horizontal.png)
 
 [Vitess](https://github.com/dolthub/vitess) is used by `go-mysql-server` for SQL parsing and serving. We quickly forked it to [remove 90% of the functionality we did not need](https://www.dolthub.com/blog/2020-09-23-vitess-pruning/). We've heavily modified our fork since to support much more SQL syntax.
 
-# Take a Deeper Dive
+## Take a Deeper Dive
 
 Continue reading for a deeper dive into the Dolt storage engine and SQL implementation.
 
-1. [The Storage Engine](./storage-engine.md)
-2. [The SQL Implementation](./sql.md)
+1. [The Storage Engine](storage-engine/)
+2. [The SQL Implementation](sql/)

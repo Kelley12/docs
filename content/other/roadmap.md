@@ -4,23 +4,18 @@ title: Roadmap
 
 # Roadmap
 
-Full details on [supported SQL
-features](../reference/sql/sql-support/README.md) are
-available on the docs site.
+Full details on [supported SQL features](../sql-reference/sql-support/) are available on the docs site.
 
-This is a selection of unimplemented features we're working on. Don't
-see what you need on here? [Let us
-know!](https://github.com/dolthub/dolt/issues) Paying customers get
-their feature requests implemented first.
+This is a selection of unimplemented features we're working on. Don't see what you need on here? [Let us know!](https://github.com/dolthub/dolt/issues) Paying customers get their feature requests implemented first.
 
 Roadmap last updated Apr 2023, next update Jul 2023.
 
 ## Upcoming features
 
 | Feature                                 | Estimate    |
-| -------                                 | ---         |
+| --------------------------------------- | ----------- |
 | Better schema merging                   | Q2 2023     |
-| dolt_ignore table                       | Q2 2023     |
+| dolt\_ignore table                      | Q2 2023     |
 | Collation regex support                 | Q2 2023     |
 | Server / CLI compatibility              | Q2 2023     |
 | 99.9% SQL correctness                   | 2023        |
@@ -45,13 +40,13 @@ Roadmap last updated Apr 2023, next update Jul 2023.
 ## Selection of recent feature launches
 
 | Feature                                   | Launch Date |
-| -------                                   | ---         |
-| dolt_column_diff system table             | Apr 2023    |
+| ----------------------------------------- | ----------- |
+| dolt\_column\_diff system table           | Apr 2023    |
 | Clone from running database               | Apr 2023    |
 | ACID transactions                         | Mar 2023    |
-| dolt_patch() procedure                    | Mar 2023    |
+| dolt\_patch() procedure                   | Mar 2023    |
 | Spatial indexes                           | Mar 2023    |
-| Complete information_schema support       | Feb 2023    |
+| Complete information\_schema support      | Feb 2023    |
 | MySQL binlog replication                  | Feb 2023    |
 | Additional join types                     | Feb 2023    |
 | Online garbage collection                 | Jan 2022    |
@@ -65,7 +60,7 @@ Roadmap last updated Apr 2023, next update Jul 2023.
 | Collation and charset support             | Sep 2022    |
 | `dolt_merge_status` system table          | Sep 2022    |
 | New storage launch (3x speedup)           | Aug 2022    |
-| Global auto_increment tracking            | Aug 2022    |
+| Global auto\_increment tracking           | Aug 2022    |
 | Users, roles, and grants                  | Aug 2022    |
 | `JSON_TABLE()`                            | Jul 2022    |
 | Table / index statistics                  | Jul 2022    |

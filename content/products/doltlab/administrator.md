@@ -1,39 +1,40 @@
 ---
-title: "Administrator Guide"
+title: Administrator Guide
 ---
 
-In DoltLab's current version, there is no Administrator (Admin) web-based UI or dashboard as it is still in development. In the meantime,
-the following information can help DoltLab Admins manually perform some common administration tasks, see below for details.
+# Administrator Guide
 
-1. [File Issues and View Release Notes](#issues-release-notes)
-2. [Backup DoltLab Data](#backup-restore-volumes)
-3. [Upgrade DoltLab Versions Without Data Loss](#upgrade-doltlab)
-4. [Send Service Logs To DoltLab Team](#send-service-logs)
-5. [Connect with the DoltLab Team](#connect-with-doltlab-team)
-6. [Authenticate a Dolt Client to use DoltLab Account](#auth-dolt-client)
-7. [Monitor DoltLab with cAdvisor and Prometheus](#prometheus)
-8. [Connect to an SMTP Server with Implicit TLS](#smtp-implicit-tls)
-9. [Troubleshoot SMTP Server Connection Problems](#troubleshoot-smtp-connection)
-10. [Prevent Unauthorized User Account Creation](#prevent-unauthorized-users)
-11. [Use an external PostgreSQL server with DoltLab](#use-external-postgres)
-12. [Expose DoltLab on a closed host with ngrok](#expose-doltlab-ngrok)
-13. [DoltLab Jobs](#doltlab-jobs)
-14. [Disable Usage Metrics](#disable-metrics)
-15. [Migrate Old Format DoltLab Databases](#migrate-doltlab-databases)
-16. [Use custom Logo on DoltLab instance](#use-custom-logo)
-17. [Customize automated emails](#customize-automated-emails)
-18. [Customize DoltLab colors](#customize-colors)
-19. [Use a domain name with DoltLab](#use-domain)
+In DoltLab's current version, there is no Administrator (Admin) web-based UI or dashboard as it is still in development. In the meantime, the following information can help DoltLab Admins manually perform some common administration tasks, see below for details.
 
-<h1 id="issues-release-notes">File Issues and View Release Notes</h1>
+1. [File Issues and View Release Notes](administrator.md#issues-release-notes)
+2. [Backup DoltLab Data](administrator.md#backup-restore-volumes)
+3. [Upgrade DoltLab Versions Without Data Loss](administrator.md#upgrade-doltlab)
+4. [Send Service Logs To DoltLab Team](administrator.md#send-service-logs)
+5. [Connect with the DoltLab Team](administrator.md#connect-with-doltlab-team)
+6. [Authenticate a Dolt Client to use DoltLab Account](administrator.md#auth-dolt-client)
+7. [Monitor DoltLab with cAdvisor and Prometheus](administrator.md#prometheus)
+8. [Connect to an SMTP Server with Implicit TLS](administrator.md#smtp-implicit-tls)
+9. [Troubleshoot SMTP Server Connection Problems](administrator.md#troubleshoot-smtp-connection)
+10. [Prevent Unauthorized User Account Creation](administrator.md#prevent-unauthorized-users)
+11. [Use an external PostgreSQL server with DoltLab](administrator.md#use-external-postgres)
+12. [Expose DoltLab on a closed host with ngrok](administrator.md#expose-doltlab-ngrok)
+13. [DoltLab Jobs](administrator.md#doltlab-jobs)
+14. [Disable Usage Metrics](administrator.md#disable-metrics)
+15. [Migrate Old Format DoltLab Databases](administrator.md#migrate-doltlab-databases)
+16. [Use custom Logo on DoltLab instance](administrator.md#use-custom-logo)
+17. [Customize automated emails](administrator.md#customize-automated-emails)
+18. [Customize DoltLab colors](administrator.md#customize-colors)
+19. [Use a domain name with DoltLab](administrator.md#use-domain)
+
+## File Issues and View Release Notes <a href="#issues-release-notes" id="issues-release-notes"></a>
 
 DoltLab's source code is currently closed, but you can file DoltLab issues or view DoltLab's [release notes](https://github.com/dolthub/doltlab-issues/releases) in our [issues repository](https://github.com/dolthub/doltlab-issues).
 
-<h1 id="backup-restore-volumes">Backup and Restore Volumes</h1>
+## Backup and Restore Volumes <a href="#backup-restore-volumes" id="backup-restore-volumes"></a>
 
 DoltLab currently persists all data to local disk using Docker volumes. To backup or restore DoltLab's data, we recommend the following steps which follow Docker's official [volume backup and restore documentation](https://docs.docker.com/storage/volumes/#back-up-restore-or-migrate-data-volumes), with the exception of DoltLab's PostgreSQL server. DoltLab <= `v0.8.4` uses PostgreSQL as its database and DoltLab `v1.0.0`+ uses Dolt. To backup the PostgreSQL server we recommend dumping the database with `pg_dump` and restoring the database from the dump using `psql`. To backup the Dolt server we recommend using Docker's volume backup and restore process, or Dolt's built-in backup and restore features.
 
-<h2 id="backup-restore-remote-data-user-data-dolt-server-data"><ins>Backing Up and Restoring Remote Data, User Uploaded Data, and Dolt Server data with Docker</ins></h2>
+### Backing Up and Restoring Remote Data, User Uploaded Data, and Dolt Server data with Docker <a href="#backup-restore-remote-data-user-data-dolt-server-data" id="backup-restore-remote-data-user-data-dolt-server-data"></a>
 
 To backup DoltLab's remote data, the database data for all database on a given DoltLab instance, leave DoltLab's services up and run:
 
@@ -99,7 +100,7 @@ docker volume rm doltlab_doltlabdb-dolt-data
 docker volume rm doltlab_doltlabdb-dolt-backups
 ```
 
-Next, [start DoltLab's services](./installation.md#start-doltlab) using the `start-doltlab.sh` script. After the script completes, stop DoltLab once more with `docker-compose stop`. Doing this will recreate the required containers so that their volumes can be updated with the commands below.
+Next, [start DoltLab's services](installation.md#start-doltlab) using the `start-doltlab.sh` script. After the script completes, stop DoltLab once more with `docker-compose stop`. Doing this will recreate the required containers so that their volumes can be updated with the commands below.
 
 Once the services are stopped, `cd` into the directory containing the `remote-data.tar` backup file and run:
 
@@ -145,7 +146,7 @@ docker run --rm --volumes-from doltlab_doltlabdb_1 -v $(pwd):/backup ubuntu bash
 
 You can now restart DoltLab, and should see all data restored from the `tar` files.
 
-<h2 id="backup-restore-postgres-data"><ins>Backing Up and Restoring PostgreSQL Data</ins></h2>
+### Backing Up and Restoring PostgreSQL Data <a href="#backup-restore-postgres-data" id="backup-restore-postgres-data"></a>
 
 For DoltLab versions <= `v0.8.4`, to backup data from DoltLab's postgres server, we recommend executing a data dump with `pg_dump`. To do so, keep DoltLab's services up and run:
 
@@ -192,7 +193,7 @@ SET session_replication_role = replica;
 ...
 ```
 
-[Start DoltLab's services](./installation.md#start-doltlab) again using the `start-doltlab.sh` script. After the script completes, `cd` into the directory containing the `postgres-dump.sql` file and run:
+[Start DoltLab's services](installation.md#start-doltlab) again using the `start-doltlab.sh` script. After the script completes, `cd` into the directory containing the `postgres-dump.sql` file and run:
 
 > For DoltLab `v0.7.0` and later, use `--network doltlab` below.
 
@@ -201,7 +202,7 @@ SET session_replication_role = replica;
 docker run --rm --network doltlab_doltlab -e PGPASSWORD=<POSTGRES_PASSWORD> -v $(pwd):/doltlab-db-dumps postgres:13-bullseye bash -c "psql --host=doltlab_doltlabdb_1 --port=5432 --username=dolthubadmin dolthubapi < /doltlab-db-dumps/postgres-dump.sql"
 ```
 
-<h2 id="backup-restore-dolt-server-backup"><ins>Backing Up and Restoring Dolt Server with `dolt backup`</ins></h2>
+### Backing Up and Restoring Dolt Server with \`dolt backup\` <a href="#backup-restore-dolt-server-backup" id="backup-restore-dolt-server-backup"></a>
 
 DoltLab `v1.0.0`+ uses Dolt as its database. To back up the Dolt server of DoltLab using Dolt's built-in backup and restore features, keep DoltLab's services up and open a connection to the database. The quickest way to do this is with the `./shell-db.sh` script included with DoltLab:
 
@@ -239,8 +240,7 @@ mysql> call dolt_backup('sync', 'local-backup');
 
 The local backup is now synced, and you can now disconnect the shell.
 
-At the time of this writing, Dolt only supports restoring backups using the CLI. To restore the Dolt server from a local backup, stop DoltLab's services using `docker-compose stop`.
-Then, use the `./dolt_db_cli.sh` included with DoltLab to open a container shell with access to the Dolt server volumes.
+At the time of this writing, Dolt only supports restoring backups using the CLI. To restore the Dolt server from a local backup, stop DoltLab's services using `docker-compose stop`. Then, use the `./dolt_db_cli.sh` included with DoltLab to open a container shell with access to the Dolt server volumes.
 
 Delete the existing `./dolthubapi` directory located at `/var/lib/dolt` from within this container:
 
@@ -262,7 +262,7 @@ dolthubapi
 
 The database has now been successfully restored, and you can now restart DoltLab.
 
-<h1 id="send-service-logs">Send Service Logs to DoltLab Team</h1>
+## Send Service Logs to DoltLab Team <a href="#send-service-logs" id="send-service-logs"></a>
 
 DoltLab is composed of [multiple services](https://www.dolthub.com/blog/2022-02-25-doltlab-101-services-and-roadmap/) running in a single Docker network via Docker compose. Logs for a particular service can be viewed using the `docker logs <container name>` command. For example, to view to logs of `doltlabapi` service, run:
 
@@ -285,7 +285,7 @@ chmod 0644 ./doltlab-api-logs.json
 
 Finally, download the copied log file from your DoltLab host using `scp`. You can then send this and any other log files to the DoltLab team member you're working with via email.
 
-<h1 id="upgrade-doltlab">Upgrading DoltLab</h1>
+## Upgrading DoltLab <a href="#upgrade-doltlab" id="upgrade-doltlab"></a>
 
 Upgrading to newer versions of DoltLab requires downtime. This means that DoltLab Admins will need to kill the old version of DoltLab, and install the newer one.
 
@@ -293,7 +293,7 @@ In addition, some early versions have different database schemas than newer ones
 
 If you want to upgrade your DoltLab version without losing any data, please follow the upgrade guidelines below.
 
-<h2 id="upgrade-v084-v100"><ins>Upgrade from DoltLab <code>v0.8.4</code> to <code>v1.0.0+</code></ins></h2>
+### Upgrade from DoltLab `v0.8.4` to `v1.0.0+` <a href="#upgrade-v084-v100" id="upgrade-v084-v100"></a>
 
 DoltLab `v0.8.4` is the final version of DoltLab released using PostgreSQL as the database backing DoltLab's API. Starting with DoltLab `v1.0.0`, DoltLab runs on Dolt.
 
@@ -316,13 +316,13 @@ DOLTHUBAPI_PASSWORD=<DOLTHUBAPI_PASSWORD> \
 
 Once the script completes, DoltLab `v1.0.0` can be started and all data from `v0.8.4` will be present.
 
-<h2 id="upgrade-v060-v070"><ins>Upgrade from DoltLab <code>v0.6.0</code> to <code>v0.7.0+</code></ins></h2>
+### Upgrade from DoltLab `v0.6.0` to `v0.7.0+` <a href="#upgrade-v060-v070" id="upgrade-v060-v070"></a>
 
 Starting with DoltLab `v0.7.0`, the `./start-doltlab.sh` script will create a `doltlab` docker network externally, instead of allowing Docker Compose to create the network automatically. If you're upgrading to `v0.7.0` or higher from an earlier DoltLab version, remove any `doltlab` or `*_doltlab` networks on the host before installing `v0.7.0`.
 
-<h2 id="upgrade-v030-plus"><ins>Upgrade from DoltLab <code>v0.3.0+</code></ins></h2>
+### Upgrade from DoltLab `v0.3.0+` <a href="#upgrade-v030-plus" id="upgrade-v030-plus"></a>
 
-DoltLab versions >= `v0.3.0` support schema migrations without data loss. To upgrade to a DoltLab version after `v0.3.0`, simply stop your old version of DoltLab, then download and unzip the newer DoltLab version to the same location as your previous version. This will ensure that when you [start the new version](./installation.md#start-doltlab) of DoltLab using the `start-doltlab.sh` script, the old DoltLab version's Docker volumes get attached to the new version's containers.
+DoltLab versions >= `v0.3.0` support schema migrations without data loss. To upgrade to a DoltLab version after `v0.3.0`, simply stop your old version of DoltLab, then download and unzip the newer DoltLab version to the same location as your previous version. This will ensure that when you [start the new version](installation.md#start-doltlab) of DoltLab using the `start-doltlab.sh` script, the old DoltLab version's Docker volumes get attached to the new version's containers.
 
 ```bash
 # stop old DoltLab
@@ -340,11 +340,11 @@ cd doltlab
 ./start-doltlab.sh
 ```
 
-<h2 id="upgrade-v020-v030"><ins>Upgrade from DoltLab <code>v0.2.0</code> to <code>v0.3.0</code></ins></h2>
+### Upgrade from DoltLab `v0.2.0` to `v0.3.0` <a href="#upgrade-v020-v030" id="upgrade-v020-v030"></a>
 
-To upgrade without data loss, follow the same instructions for upgrading found in the [Upgrade from DoltLab <code>v0.1.0</code> <code>v0.2.0</code>](#upgrade-v010-v020) section.
+To upgrade without data loss, follow the same instructions for upgrading found in the [Upgrade from DoltLab `v0.1.0` `v0.2.0`](administrator.md#upgrade-v010-v020) section.
 
-<h2 id="upgrade-v010-v020"><ins>Upgrade from DoltLab <code>v0.1.0</code> to <code>v0.2.0</code> Without Data Loss</ins></h2>
+### Upgrade from DoltLab `v0.1.0` to `v0.2.0` Without Data Loss <a href="#upgrade-v010-v020" id="upgrade-v010-v020"></a>
 
 To upgrade DoltLab `v0.1.0` to `v0.2.0`, leave DoltLab `v0.1.0`'s services running and connect a PostgreSQL client from inside the `doltlab_doltlab` Docker network to the running `doltlab_doltlabdb_1` server. On the DoltLab host machine, run:
 
@@ -386,15 +386,13 @@ docker-compose stop
 docker container prune
 ```
 
-<!-- TODO: have them backup data first? -->
-
 Next, remove the Docker volume used with DoltLab `v0.1.0`'s `doltlab_doltlabdb_1` postgres server by running:
 
 ```bash
 docker volume rm doltlab_doltlabdb-data
 ```
 
-[Download DoltLab](./installation.md#download-doltlab) `v0.2.0`, unzip it's contents, and [start DoltLab](./installation.md#start-doltlab) `v0.2.0`'s services by running the `start-doltlab.sh` script.
+[Download DoltLab](installation.md#download-doltlab) `v0.2.0`, unzip it's contents, and [start DoltLab](installation.md#start-doltlab) `v0.2.0`'s services by running the `start-doltlab.sh` script.
 
 After the script completes, confirm DoltLab `v0.2.0`'s services are running with `docker ps`:
 
@@ -422,19 +420,17 @@ docker run --rm --network doltlab_doltlab -e PGPASSWORD=<POSTGRES_PASSWORD> -v $
 
 You have now completed the upgrade, and should no be running DoltLab `v0.2.0` with your postgres data from DoltLab `v0.1.0`.
 
-<h1 id="connect-with-doltlab-team">Connect with the DoltLab Team</h1>
+## Connect with the DoltLab Team <a href="#connect-with-doltlab-team" id="connect-with-doltlab-team"></a>
 
 If you need to connect to a DoltLab team member, the best way to do so is on [Discord](https://discord.gg/s8uVgc3), in the `#doltlab` server.
 
-<h1 id="auth-dolt-client">Authenticate a Dolt Client to use a DoltLab Account</h1>
+## Authenticate a Dolt Client to use a DoltLab Account <a href="#auth-dolt-client" id="auth-dolt-client"></a>
 
-As of Dolt `v0.39.0`, the [dolt login](../../reference/cli.md#dolt-login) command can be used to authenticate against DoltLab instances.
+As of Dolt `v0.39.0`, the [dolt login](../../cli-reference/cli.md#dolt-login) command can be used to authenticate against DoltLab instances.
 
 To authenticate a client against DoltLab with this command, use the `--auth-endpoint`, `--login-url`, and `--insecure` arguments to point your Dolt client at the DoltLab instance you want to authenticate against.
 
-`--auth-endpoint` should point at the [DoltLab RemoteAPI Server](https://www.dolthub.com/blog/2022-02-25-doltlab-101-services-and-roadmap/#doltlab-remoteapi-server) running on port `50051`.
-`--login-url` should point at the DoltLab instance's credentials page.
-`--insecure` a boolean flag, should be used since DoltLab does not currently support TLS `gRPC` connections.
+`--auth-endpoint` should point at the [DoltLab RemoteAPI Server](https://www.dolthub.com/blog/2022-02-25-doltlab-101-services-and-roadmap/#doltlab-remoteapi-server) running on port `50051`. `--login-url` should point at the DoltLab instance's credentials page. `--insecure` a boolean flag, should be used since DoltLab does not currently support TLS `gRPC` connections.
 
 ```bash
 dolt login --insecure --auth-endpoint doltlab.dolthub.com:50051 --login-url http://doltlab.dolthub.com/settings/credentials
@@ -458,7 +454,7 @@ requesting update
 Key successfully associated with user: <user> email <email>
 ```
 
-For Dolt clients < `v0.39.0`, or to authenticate without using the `dolt login` command, first run the [dolt creds new](../../reference/cli.md#dolt-creds-new) command, which will output a new public key:
+For Dolt clients < `v0.39.0`, or to authenticate without using the `dolt login` command, first run the [dolt creds new](../../cli-reference/cli.md#dolt-creds-new) command, which will output a new public key:
 
 ```bash
 dolt creds new
@@ -466,7 +462,7 @@ Credentials created successfully.
 pub key: fef0kj7ia389i5atv8mcb31ksg9h3i6cji7aunm4jea9tccdl2cg
 ```
 
-Copy the generated public key and run the [dolt creds use](../../reference/cli.md#dolt-creds-use) command:
+Copy the generated public key and run the [dolt creds use](../../cli-reference/cli.md#dolt-creds-use) command:
 
 ```bash
 dolt creds use fef0kj7ia389i5atv8mcb31ksg9h3i6cji7aunm4jea9tccdl2cg
@@ -478,7 +474,7 @@ Paste the public key into the "Public Key" field, write a description in the "De
 
 Your Dolt client is now authenticated for this DoltLab account.
 
-<h1 id="prometheus">Monitor DoltLab with cAdvisor and Prometheus</h1>
+## Monitor DoltLab with cAdvisor and Prometheus <a href="#prometheus" id="prometheus"></a>
 
 As of DoltLab `v0.3.0`, [Prometheus](https://prometheus.io/) [gRPC](https://grpc.io/) service metrics for [DoltLab's Remote API Server](https://www.dolthub.com/blog/2022-02-25-doltlab-101-services-and-roadmap/#doltlab-remoteapi-server), `doltlabremoteapi`, and [DoltLab's Main API server](https://www.dolthub.com/blog/2022-02-25-doltlab-101-services-and-roadmap/#doltlab-api-server), `doltlabapi`, are published on port `7770`.
 
@@ -527,7 +523,7 @@ docker run -d --add-host host.docker.internal:host-gateway --name=prometheus -p 
 
 `--add-host host.docker.internal:host-gateway` is only required if running the Prometheus server on the DoltLab host. If running it elsewhere, this argument may be omitted, and the `host.docker.internal` hostname in `prometheus.yml` can be changed to the hostname of your DoltLab host.
 
-<h1 id="smtp-implicit-tls">Connect to an SMTP Server with Implicit TLS</h1>
+## Connect to an SMTP Server with Implicit TLS <a href="#smtp-implicit-tls" id="smtp-implicit-tls"></a>
 
 Starting with DoltLab `v0.4.2`, connections to existing SMTP servers using implicit TLS (on port `465`, for example) are supported. To connect using implicit TLS, edit the `docker-compose.yaml` included in the DoltLab zip. Under the `doltlabapi` section, in the `command` block, add the following argument:
 
@@ -543,11 +539,11 @@ doltlabapi:
 
 After adding the argument, restart DoltLab for it to take effect. Additionally, TLS verification can be skipped by adding the additional argument `-emailInsecureTLS`.
 
-<h1 id="troubleshoot-smtp-connection">Troubleshoot SMTP Server Connection Problems</h1>
+## Troubleshoot SMTP Server Connection Problems <a href="#troubleshoot-smtp-connection" id="troubleshoot-smtp-connection"></a>
 
 DoltLab requires a connection to an existing SMTP server in order for users to create accounts, verify email addresses, reset forgotten passwords, and collaborate on databases.
 
-Starting with DoltLab `v0.4.1`, the [default user](./installation.md#doltlab-default-user) `admin` is created when DoltLab starts up, which allows admins to sign in to their DoltLab instance even if they are experiencing SMTP server connection issues.
+Starting with DoltLab `v0.4.1`, the [default user](installation.md#doltlab-default-user) `admin` is created when DoltLab starts up, which allows admins to sign in to their DoltLab instance even if they are experiencing SMTP server connection issues.
 
 To help troubleshoot and resolve SMTP server connection issues, we've published the following [go tool](https://gist.github.com/coffeegoddd/66f5aeec98640ff8a22a1b6910826667) to help diagnose the SMTP connection issues on the host running DoltLab.
 
@@ -631,7 +627,7 @@ Sending email with auth method: plain
 Successfully sent email!
 ```
 
-<h1 id="prevent-unauthorized-users">Prevent Unauthorized User Account Creation</h1>
+## Prevent Unauthorized User Account Creation <a href="#prevent-unauthorized-users" id="prevent-unauthorized-users"></a>
 
 DoltLab for non-enterprise use currently supports explicit email whitelisting to prevent account creation by unauthorized users.
 
@@ -659,7 +655,7 @@ You can now execute the following `INSERT` to allow a specific user with `exampl
 INSERT INTO email_whitelist_elements (email_address, updated_at, created_at) VALUES ('example@address.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 ```
 
-<h1 id="use-external-postgres">Use an external PostgreSQL server with DoltLab</h1>
+## Use an external PostgreSQL server with DoltLab <a href="#use-external-postgres" id="use-external-postgres"></a>
 
 You can connect a DoltLab instance to an external PostgreSQL server version `13` or later. To connect, in DoltLab's `docker-compose.yaml`, supply the host and port for the external server to `doltlabapi`'s `-pghost` and `-pgport` arguments.
 
@@ -685,11 +681,11 @@ CREATE EXTENSION citext SCHEMA public;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO dolthubapi;
 ```
 
-<h1 id="expose-doltlab-ngrok">Expose a DoltLab instance with ngrok</h1>
+## Expose a DoltLab instance with ngrok <a href="#expose-doltlab-ngrok" id="expose-doltlab-ngrok"></a>
 
 As of DoltLab `v0.5.5`, DoltLab instances can be exposed with [ngrok](https://ngrok.com/). ["How to expose DoltLab with ngrok"](https://www.dolthub.com/blog/2022-08-08-expose-doltlab-with-ngrok/) contains the instructions for this process, however, we do not recommend doing this for production DoltLab instances. This process requires one of DoltLab's services to be run _without_ authentication, which may expose sensitive data. Do this at your own risk.
 
-<h1 id="doltlab-jobs">DoltLab Jobs</h1>
+## DoltLab Jobs <a href="#doltlab-jobs" id="doltlab-jobs"></a>
 
 Jobs were [recently introduced](https://www.dolthub.com/blog/2022-10-07-dolthub-jobs-and-doltlab-v0.6.0/) on [DoltHub](https://www.dolthub.com) and are available now on DoltLab ^`v0.7.0`. DoltLab Jobs are stand-alone, long-running Docker containers that perform specific tasks for DoltLab users behind the scenes. DoltLab `v0.7.0` includes a single Job type, the Import Job, for large file imports. But, additional Jobs will be added in subsequent versions of DoltLab.
 
@@ -701,7 +697,7 @@ As a result of the new Jobs infrastructure, DoltLab now requires more memory and
 
 If you want to run a DoltLab instance that can support these end user limits, we recommend running DoltLab on a host with at least 64 GB of memory, and 20 TBs of disk. These recommended amounts will decrease as we continue to improve Dolt's resource efficiency and utilization.
 
-<h2 id="doltlab-job-import"><ins>Import Jobs</ins></h2>
+### Import Jobs <a href="#doltlab-job-import" id="doltlab-job-import"></a>
 
 Under the hood, when a user uploads a file to DoltLab, a new Job is kicked off that copies that file into a new Docker container running a `dolt` binary. This Job container executes `dolt table import <file>` or `dolt sql < <file>`, depending on the file type of the uploaded file, which imports the data into a clone of the target database. The container finishes by opening a pull request containing the imported data.
 
@@ -715,13 +711,13 @@ For this reason, we recommend running DoltLab on a host with as much disk and me
 
 Import performance, memory and disk utilization are all areas of concentration for our team in the coming months. We are committed to bringing all of these down for Dolt, DoltHub, and DoltLab, so stay tuned for updates.
 
-<h1 id="disable-metrics">Disable Usage Metrics</h1>
+## Disable Usage Metrics <a href="#disable-metrics" id="disable-metrics"></a>
 
 By default, DoltLab collects first-party metrics for deployed instances. We use DoltLab's metrics to determine how many resources to allocate toward its development and improvement.
 
 As of `v0.7.0`, DoltLab does not collect third-party metrics, and additionally, DoltLab's first-party metrics can be disabled. To disable metrics, edit the `start-doltlab.sh` script and remove `run_with_metrics` from the `_main` function.
 
-<h1 id="migrate-doltlab-databases">Migrate Old Format DoltLab Databases</h1>
+## Migrate Old Format DoltLab Databases <a href="#migrate-doltlab-databases" id="migrate-doltlab-databases"></a>
 
 Unlike [DoltHub](https://www.dolthub.com), DoltLab does not support automatic database migration for old format Dolt databases. Instead, old format database hosted on DoltLab need to be migrated manually. To migrate a DoltLab database:
 
@@ -731,7 +727,7 @@ Unlike [DoltHub](https://www.dolthub.com), DoltLab does not support automatic da
 4. Add the remote of the new DoltLab database to the cloned database with `dolt remote add <remote name> http://<host ip>:50051/<owner>/<new db name>`.
 5. Push the migrated clone to the new database with `dolt push <remote name> <branch name>`.
 
-<h1 id="use-custom-logo">Use custom logo on DoltLab instance</h1>
+## Use custom logo on DoltLab instance <a href="#use-custom-logo" id="use-custom-logo"></a>
 
 Starting with DoltLab `v0.7.6`, DoltLab allows administrators to customize the logo used across their DoltLab instance. At the time of this writing, custom logos used on DoltLab can have a maximum height of `24px` and a maximum width of `112px`. If a custom logo is used on DoltLab, the footer of the DoltLab instance will display the text "Powered by DoltLab" below the custom logo.
 
@@ -746,26 +742,25 @@ Add the field `logo` to the `admin-config.yaml` file with the absolute path of c
 
 Save the file, and restart your DoltLab instance using the `start-doltlab.sh` script. When DoltLab restarts, you will see the custom logo in place of the DoltLab logo.
 
-<h1 id="customize-automated-emails">Customize automated emails</h1>
+## Customize automated emails <a href="#customize-automated-emails" id="customize-automated-emails"></a>
 
 Starting with DoltLab `v0.7.6`, DoltLab allows administrators to customize the automated emails their DoltLab instance sends to its users. Included in the DoltLab zip is a directory called `templates` that stores the [golang text template files](https://pkg.go.dev/text/template) your DoltLab instance will use to generate emails. Each file is named according to use case and the names of the files should NOT be changed.
 
-- `email/collabInvite.txt` sent to invite user to be a database collaborator.
-- `email/invite.txt` sent to invite a user to join an organization.
-- `email/issueComment.txt` sent to notify user that an issue received a comment.
-- `email/issueState.txt` sent to notify user that an issue's state has changed.
-- `email/pullComment.txt` sent to notify user that a pull request received a comment.
-- `email/pullCommits.txt` sent to notify user that a pull request received a commit.
-- `email/pullReview.txt` sent to notify user that a pull request review's state has changed.
-- `email/pullState.txt` sent to notify user that a pull request's state has changed.
-- `email/recoverPassword.txt` sent to provide user with a link to reset their password.
-- `email/resetPassword.txt` sent to notify a user that their password has been reset.
-- `email/verify.txt` sent to a user to verify their email account.
+* `email/collabInvite.txt` sent to invite user to be a database collaborator.
+* `email/invite.txt` sent to invite a user to join an organization.
+* `email/issueComment.txt` sent to notify user that an issue received a comment.
+* `email/issueState.txt` sent to notify user that an issue's state has changed.
+* `email/pullComment.txt` sent to notify user that a pull request received a comment.
+* `email/pullCommits.txt` sent to notify user that a pull request received a commit.
+* `email/pullReview.txt` sent to notify user that a pull request review's state has changed.
+* `email/pullState.txt` sent to notify user that a pull request's state has changed.
+* `email/recoverPassword.txt` sent to provide user with a link to reset their password.
+* `email/resetPassword.txt` sent to notify a user that their password has been reset.
+* `email/verify.txt` sent to a user to verify their email account.
 
 To alter the text within one of the above files, we recommend only changing the hardcoded text between the [Actions](https://pkg.go.dev/text/template#hdr-Actions) and replacing the use of `{{.App}}`, which normally evaluates to "DoltLab", with the name of your company or team.
 
-You should not change any template definitions, indicated with `{{define "some-template-name"}}` syntax, within these files as `doltlabapi` specifically uses these
-definitions.
+You should not change any template definitions, indicated with `{{define "some-template-name"}}` syntax, within these files as `doltlabapi` specifically uses these definitions.
 
 To better illustrate how to modify these files, let's look at an example. Here is the default `email/verify.txt` template:
 
@@ -829,8 +824,7 @@ You're receiving the email because you created a new AcmeLab account or added a 
 {{- end}}
 ```
 
-Lastly, let's customize this email with the contact information of our AcmeLab admin, in case users have any questions. We want to add the same
-information to the `verifyHTML` template and the `verifyText` template so that it appears for either supported email format:
+Lastly, let's customize this email with the contact information of our AcmeLab admin, in case users have any questions. We want to add the same information to the `verifyHTML` template and the `verifyText` template so that it appears for either supported email format:
 
 ```
 {{define "verifySubject" -}}
@@ -867,7 +861,7 @@ If you need further assistance, please reach out to Kevin at kevin@acmeinc.com.
 
 Once we save our edits, we can restart our DoltLab instance for the changes to take affect.
 
-<h1 id="customize-colors">Customize DoltLab colors</h1>
+## Customize DoltLab colors <a href="#customize-colors" id="customize-colors"></a>
 
 Starting with DoltLab `v0.8.1`, DoltLab allows administrators to customize the color of certain assets across their DoltLab instance.
 
@@ -891,7 +885,7 @@ Add the field `theme`, then `custom` to the `admin-config.yaml` file. In the `cu
 
 After adding your custom values, save the file, and restart your DoltLab instance using the `start-doltlab.sh` script. When DoltLab restarts, you will see the custom colors across the site.
 
-<h1 id="use-domain">Use a domain name with DoltLab</h1>
+## Use a domain name with DoltLab <a href="#use-domain" id="use-domain"></a>
 
 It's common practice to provision a domain name to use for a DoltLab instance. To do so, secure a domain name and map it to the _stable_, public IP address of the DoltLab host. Then, supply the domain name as the value to the `HOST_IP` environment variable when starting DoltLab. Let's look at an example using services offered by AWS.
 

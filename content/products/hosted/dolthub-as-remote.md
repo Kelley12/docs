@@ -1,80 +1,50 @@
 ---
-title: "Hosted Dolt: Using DoltHub as a Remote"
+title: 'Hosted Dolt: Using DoltHub as a Remote'
 ---
 
-To interact with DoltHub from your Hosted instance, you can use DoltHub as a
-[remote](../../concepts/dolt/git/remotes.md). We have [SQL
-remote](https://www.dolthub.com/blog/2021-09-22-sql-remotes) operations such as
-`dolt_clone`, `dolt_pull`, and `dolt_push` that let you interact with remotes using SQL.
-You can add Dolt credentials to your Hosted instance to authenticate certain operations,
-like cloning a private database from DoltHub or pushing changes to a DoltHub database you
-have write permissions to.
+# Using DoltHub as a Remote
 
-Hosted and DoltHub have different [use cases](https://www.dolthub.com/compare) depending
-on your goals, but there are also reasons to use DoltHub and Hosted together. Easily build
-an online application based on a [crowd-sourced database](https://dolthub.com/bounties) on
-DoltHub or isolate changes to your production database and sync on your schedule.
+To interact with DoltHub from your Hosted instance, you can use DoltHub as a [remote](../../concepts/dolt/git/remotes.md). We have [SQL remote](https://www.dolthub.com/blog/2021-09-22-sql-remotes) operations such as `dolt_clone`, `dolt_pull`, and `dolt_push` that let you interact with remotes using SQL. You can add Dolt credentials to your Hosted instance to authenticate certain operations, like cloning a private database from DoltHub or pushing changes to a DoltHub database you have write permissions to.
 
-# How Dolt credentials work on Hosted
+Hosted and DoltHub have different [use cases](https://www.dolthub.com/compare) depending on your goals, but there are also reasons to use DoltHub and Hosted together. Easily build an online application based on a [crowd-sourced database](https://dolthub.com/bounties) on DoltHub or isolate changes to your production database and sync on your schedule.
 
-When you use Dolt on the [command line](../../reference/cli.md) to interact with DoltHub
-or DoltLab to pull private databases or push to databases you have permission to, you're
-required to run [`dolt login`](../../reference/cli.md#dolt-login). This creates a new
-public/private keypair for authenticating with doltremoteapi and adds it to your global
-Dolt configuration. It then opens up your browser to your [credential settings
-page](https://www.dolthub.com/settings/credentials) on DoltHub where you can add the
-public key.
+## How Dolt credentials work on Hosted
 
-Since you don't have access to the command line from your Hosted instance, the process for
-adding credentials is a little different. When you create a deployment and select "Expose
-Dolt credentials" or add credentials to an existing deployment, our [deployment manager
-service](https://www.dolthub.com/blog/2022-06-06-hosted-infrastructure#architecture) will
-generate Dolt credentials and add them to the global Dolt configuration on your instance.
-We store the public key so it is available in the settings tab of your deployment. Once
-you add this key to DoltHub, you can use [SQL
-remote](https://www.dolthub.com/blog/2021-09-22-sql-remotes) commands to clone, push,
-pull, and fetch from public or private databases.
+When you use Dolt on the [command line](../../cli-reference/cli.md) to interact with DoltHub or DoltLab to pull private databases or push to databases you have permission to, you're required to run [`dolt login`](../../cli-reference/cli.md#dolt-login). This creates a new public/private keypair for authenticating with doltremoteapi and adds it to your global Dolt configuration. It then opens up your browser to your [credential settings page](https://www.dolthub.com/settings/credentials) on DoltHub where you can add the public key.
+
+Since you don't have access to the command line from your Hosted instance, the process for adding credentials is a little different. When you create a deployment and select "Expose Dolt credentials" or add credentials to an existing deployment, our [deployment manager service](https://www.dolthub.com/blog/2022-06-06-hosted-infrastructure#architecture) will generate Dolt credentials and add them to the global Dolt configuration on your instance. We store the public key so it is available in the settings tab of your deployment. Once you add this key to DoltHub, you can use [SQL remote](https://www.dolthub.com/blog/2021-09-22-sql-remotes) commands to clone, push, pull, and fetch from public or private databases.
 
 ![](../../.gitbook/assets/dolthub-hosted-remote.png)
 
-# Example
+## Example
 
-## 1. Find a database on DoltHub to clone
+### 1. Find a database on DoltHub to clone
 
-We have an example user metrics database on DoltHub named `dolthub/user_metrics`. Since we
-don't want our metrics to be publicly accessible, the database is private.
+We have an example user metrics database on DoltHub named `dolthub/user_metrics`. Since we don't want our metrics to be publicly accessible, the database is private.
 
-We want to host this data on Hosted Dolt so that we can use [Google Looker
-Studio](https://lookerstudio.google.com/) to visualize our data. Learn more about that
-process [here](https://www.dolthub.com/blog/2023-02-13-dolt-looker/).
+We want to host this data on Hosted Dolt so that we can use [Google Looker Studio](https://lookerstudio.google.com/) to visualize our data. Learn more about that process [here](https://www.dolthub.com/blog/2023-02-13-dolt-looker/).
 
-## 2. Create a new deployment on Hosted
+### 2. Create a new deployment on Hosted
 
-Next, I create a [new deployment](https://hosted.doltdb.com/create-deployment) on Hosted
-and check the `Expose Dolt credentials` check box from the form.
+Next, I create a [new deployment](https://hosted.doltdb.com/create-deployment) on Hosted and check the `Expose Dolt credentials` check box from the form.
 
 ![](../../.gitbook/assets/hosted-create-deployment-credentials.png)
 
-Once the deployment has started, the public key will be populated in the settings tab of
-the deployment page (this may take a few minutes). Note that any deployment administrator
-will have access to this key.
+Once the deployment has started, the public key will be populated in the settings tab of the deployment page (this may take a few minutes). Note that any deployment administrator will have access to this key.
 
 ![](../../.gitbook/assets/hosted-dolt-creds-public-key.png)
 
-If I accidentally expose my key or decide I want to remove it, I also have those options
-there.
+If I accidentally expose my key or decide I want to remove it, I also have those options there.
 
-## 3. Add public key to DoltHub
+### 3. Add public key to DoltHub
 
-I click on "Add to DoltHub" to add my public key to DoltHub. This will open my DoltHub
-[credentials settings page](https://www.dolthub.com/settings/credentials).
+I click on "Add to DoltHub" to add my public key to DoltHub. This will open my DoltHub [credentials settings page](https://www.dolthub.com/settings/credentials).
 
 ![](../../.gitbook/assets/dolthub-credentials-for-hosted.png)
 
-## 4. Connect to Hosted instance and clone DoltHub database
+### 4. Connect to Hosted instance and clone DoltHub database
 
-Now that I have my credentials set up, I can connect to the Hosted instance using the
-information in the Connectivity tab and clone my `dolthub/user_metrics` database.
+Now that I have my credentials set up, I can connect to the Hosted instance using the information in the Connectivity tab and clone my `dolthub/user_metrics` database.
 
 ```sql
 % mysql -h"dolthub-metrics-example.dbs.hosted.doltdb.com" -u"[username]" -p"[password]"
@@ -123,26 +93,19 @@ mysql> show tables;
 1 row in set (0.04 sec)
 ```
 
-Now I can do whatever I want with my metrics data, including following [these
-steps](https://www.dolthub.com/blog/2023-02-13-dolt-looker/#create-a-data-source) to
-connect my Hosted instance to Looker.
+Now I can do whatever I want with my metrics data, including following [these steps](https://www.dolthub.com/blog/2023-02-13-dolt-looker/#create-a-data-source) to connect my Hosted instance to Looker.
 
-## 5. Make changes to database on DoltHub
+### 5. Make changes to database on DoltHub
 
 Finance reviews our metrics charts and finds a hole in the data suggesting an outage.
 
-Finance decides they want to show estimated metrics for the missing days, but we don't
-trust Finance to have direct access to our production database. Instead, they can fill in
-the estimated `user_counts` for the missing metrics on DoltHub using the spreadsheet
-editor and create a pull request. They don't even need to know SQL!
+Finance decides they want to show estimated metrics for the missing days, but we don't trust Finance to have direct access to our production database. Instead, they can fill in the estimated `user_counts` for the missing metrics on DoltHub using the spreadsheet editor and create a pull request. They don't even need to know SQL!
 
 ![](../../.gitbook/assets/dolthub-spreadsheet-editor-user-metrics.png)
 
-## 6. Pull new DoltHub branch to Hosted instance for testing
+### 6. Pull new DoltHub branch to Hosted instance for testing
 
-We want to review the new chart from the change before we merge it to `main`. We can pull
-that branch to our Hosted instance and use it to [create a new branch in
-Looker](https://www.dolthub.com/blog/2023-02-13-dolt-looker/#use-a-branch).
+We want to review the new chart from the change before we merge it to `main`. We can pull that branch to our Hosted instance and use it to [create a new branch in Looker](https://www.dolthub.com/blog/2023-02-13-dolt-looker/#use-a-branch).
 
 ```sql
 mysql> call dolt_pull('origin', 'outage-estimates');
@@ -166,11 +129,9 @@ mysql> select * from dolt_diff('main...outage-estimates', 'user_counts');
 
 ```
 
-## 7. Make a change from Hosted and push it back to DoltHub
+### 7. Make a change from Hosted and push it back to DoltHub
 
-We are mostly satisfied with the new chart, but I want to make a small update to the
-metrics for one of the days. I can make the change from Hosted on a branch and push it
-back to DoltHub using `dolt_push`.
+We are mostly satisfied with the new chart, but I want to make a small update to the metrics for one of the days. I can make the change from Hosted on a branch and push it back to DoltHub using `dolt_push`.
 
 ```sql
 mysql> call dolt_checkout('-b', 'outage-update');
@@ -206,10 +167,9 @@ I will see the new branch in my database on DoltHub.
 
 ![](../../.gitbook/assets/dolthub-outage-updates-branch.png)
 
-## 8. Merge branches into `main` on DoltHub and pull again to Hosted
+### 8. Merge branches into `main` on DoltHub and pull again to Hosted
 
-From there, our changes are approved and merged into the `main` branch on DoltHub. One
-more `dolt_pull` will update our `main` branch on Hosted.
+From there, our changes are approved and merged into the `main` branch on DoltHub. One more `dolt_pull` will update our `main` branch on Hosted.
 
 ```sql
 mysql> call dolt_pull('origin', 'main');
